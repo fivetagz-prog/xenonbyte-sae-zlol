@@ -4,7 +4,7 @@
 -- ✅ VIPTP instead of EggCheckPremium
 -- ==================================================
 
-local BASE_URL = "https://raw.githubusercontent.com/fivetags-prog/stealanegg-main/main/"
+local BASE_URL = "https://raw.githubusercontent.com/fivetagz-prog/xenonbyte-sae-zlol/main/stealanegg-main/"
 
 _G.XENONBYTE_EnablePrint = false
 
