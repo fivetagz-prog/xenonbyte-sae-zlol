@@ -1,25 +1,30 @@
 -- ==================================================
 -- XENONBYTE HUB | STEAL AN EGG | Loader
--- ✅ Load CharacterSystem before Features
--- ✅ VIPTP instead of EggCheckPremium
 -- ==================================================
 
-local BASE_URL = "https://raw.githubusercontent.com/fivetagz-prog/xenonbyte-sae-zlol/main/stealanegg-main/"
+local BASE_URL =
+    "https://raw.githubusercontent.com/fivetagz-prog/xenonbyte-sae-zlol/main/stealanegg-main/"
 
 _G.XENONBYTE_EnablePrint = false
 
 local oldPrint = print
+
 print = function(...)
     if _G.XENONBYTE_EnablePrint then
         oldPrint(...)
     end
 end
 
-print("Loading XenonByte...")
+local function Log(...)
+    oldPrint("[XENONBYTE]", ...)
+end
+
+Log("Loading XenonByte...")
 
 -- ==================================================
 -- CACHE SYSTEM
 -- ==================================================
+
 _G.XENONBYTE_Cache = _G.XENONBYTE_Cache or {}
 
 local function GetScript(path)
@@ -29,15 +34,56 @@ local function GetScript(path)
         return _G.XENONBYTE_Cache[fullPath]
     end
 
-    local script = game:HttpGet(fullPath)
+    Log("Loading:", path)
 
-    _G.XENONBYTE_Cache[fullPath] = script
-    return script
+    local success, result = pcall(function()
+        return game:HttpGet(fullPath)
+    end)
+
+    if not success then
+        error(
+            "\n[XENONBYTE] FAILED TO LOAD FILE\n" ..
+            "File: " .. tostring(path) .. "\n" ..
+            "URL: " .. tostring(fullPath) .. "\n" ..
+            "Error: " .. tostring(result)
+        )
+    end
+
+    if not result or result == "" then
+        error(
+            "\n[XENONBYTE] EMPTY FILE\n" ..
+            "File: " .. tostring(path) .. "\n" ..
+            "URL: " .. tostring(fullPath)
+        )
+    end
+
+    _G.XENONBYTE_Cache[fullPath] = result
+
+    return result
+end
+
+local function LoadScript(path)
+    local source = GetScript(path)
+
+    local success, result = pcall(function()
+        return loadstring(source)()
+    end)
+
+    if not success then
+        error(
+            "\n[XENONBYTE] LUA ERROR\n" ..
+            "File: " .. tostring(path) .. "\n" ..
+            "Error: " .. tostring(result)
+        )
+    end
+
+    return result
 end
 
 -- ==================================================
 -- WAIT UNTIL GAME IS LOADED
 -- ==================================================
+
 repeat
     task.wait()
 until game:IsLoaded() and game.Players.LocalPlayer
@@ -45,12 +91,14 @@ until game:IsLoaded() and game.Players.LocalPlayer
 local Player = game.Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 
-print("Game loaded, Player: " .. Player.Name)
+Log("Game loaded:", Player.Name)
 
 -- ==================================================
 -- CREATE LOADING SCREEN
 -- ==================================================
+
 local function CreateLoadingScreen()
+
     local LoadingGui = Instance.new("ScreenGui")
     LoadingGui.Name = "LoadingScreen"
     LoadingGui.ResetOnSpawn = false
@@ -143,118 +191,133 @@ local function CreateLoadingScreen()
 
     local function UpdateProgress(percent)
         percent = math.clamp(percent, 0, 100)
-        Bar.Size = UDim2.new(percent / 100, 0, 1, 0)
+
+        Bar.Size = UDim2.new(
+            percent / 100,
+            0,
+            1,
+            0
+        )
+
         Percent.Text = math.floor(percent) .. "%"
     end
 
     return {
         Gui = LoadingGui,
+
         Update = UpdateProgress,
+
         Destroy = function()
-            LoadingGui:Destroy()
+            if LoadingGui then
+                LoadingGui:Destroy()
+            end
         end
     }
 end
 
 -- ==================================================
--- CREATE LOADING SCREEN
+-- LOADING SCREEN
 -- ==================================================
+
 local Loading = CreateLoadingScreen()
+
 Loading.Update(5)
 
 -- ==================================================
--- LOAD CORE FILES
+-- CORE
 -- ==================================================
+
 Loading.Update(10)
-loadstring(GetScript("Config.lua"))()
+LoadScript("Config.lua")
 
 Loading.Update(15)
-loadstring(GetScript("UI.lua"))()
+LoadScript("UI.lua")
 
 Loading.Update(20)
-loadstring(GetScript("Components.lua"))()
+LoadScript("Components.lua")
 
 -- ==================================================
--- LOAD TABS MANAGER
+-- TABS MANAGER
 -- ==================================================
+
 Loading.Update(25)
-loadstring(GetScript("Tabs/Init.lua"))()
+LoadScript("Tabs/Init.lua")
 
 -- ==================================================
--- LOAD FEATURES
+-- FEATURES
 -- ==================================================
+
 Loading.Update(28)
-loadstring(GetScript("Features/AntiAFK.lua"))()
+LoadScript("Features/AntiAFK.lua")
 
 Loading.Update(30)
-loadstring(GetScript("Features/WalkSpeed.lua"))()
+LoadScript("Features/WalkSpeed.lua")
 
 Loading.Update(33)
-loadstring(GetScript("Features/AntiTrap.lua"))()
+LoadScript("Features/AntiTrap.lua")
 
 Loading.Update(36)
-loadstring(GetScript("Features/GodMode.lua"))()
+LoadScript("Features/GodMode.lua")
 
 Loading.Update(39)
-loadstring(GetScript("Features/TeleportSystem.lua"))()
+LoadScript("Features/TeleportSystem.lua")
 
 Loading.Update(42)
-loadstring(GetScript("Features/AutoFarm.lua"))()
+LoadScript("Features/AutoFarm.lua")
 
 Loading.Update(45)
-loadstring(GetScript("Features/AutoAttack.lua"))()
+LoadScript("Features/AutoAttack.lua")
 
 Loading.Update(48)
-loadstring(GetScript("Features/AFKSystem.lua"))()
+LoadScript("Features/AFKSystem.lua")
 
--- VIPTP (AFK Farm Only)
 Loading.Update(50)
-loadstring(GetScript("Features/VIPTP.lua"))()
+LoadScript("Features/VIPTP.lua")
 
 Loading.Update(51)
-loadstring(GetScript("Features/AttackDrone.lua"))()
+LoadScript("Features/AttackDrone.lua")
 
 Loading.Update(54)
-loadstring(GetScript("Features/ManagerDrone.lua"))()
+LoadScript("Features/ManagerDrone.lua")
 
 Loading.Update(57)
-loadstring(GetScript("Features/ManualFastClick.lua"))()
+LoadScript("Features/ManualFastClick.lua")
 
--- FarmingManager
 Loading.Update(59)
-loadstring(GetScript("Features/FarmingManager.lua"))()
+LoadScript("Features/FarmingManager.lua")
 
--- ConfigSystem
 Loading.Update(60)
-loadstring(GetScript("Features/ConfigSystem.lua"))()
+LoadScript("Features/ConfigSystem.lua")
 
 -- ==================================================
--- LOAD TABS
+-- TABS
 -- ==================================================
+
 Loading.Update(62)
-loadstring(GetScript("Tabs/Info.lua"))()
+LoadScript("Tabs/Info.lua")
 
 Loading.Update(65)
-loadstring(GetScript("Tabs/Farming.lua"))()
+LoadScript("Tabs/Farming.lua")
 
 Loading.Update(70)
-loadstring(GetScript("Tabs/Combat.lua"))()
+LoadScript("Tabs/Combat.lua")
 
 Loading.Update(75)
-loadstring(GetScript("Tabs/AutoFarming.lua"))()
+LoadScript("Tabs/AutoFarming.lua")
 
 Loading.Update(80)
-loadstring(GetScript("Tabs/Event.lua"))()
+LoadScript("Tabs/Event.lua")
 
 Loading.Update(85)
-loadstring(GetScript("Tabs/HopServer.lua"))()
+LoadScript("Tabs/HopServer.lua")
 
 Loading.Update(90)
-loadstring(GetScript("Tabs/Setting.lua"))()
+LoadScript("Tabs/Setting.lua")
 
 -- ==================================================
--- SELECT DEFAULT TAB
+-- DEFAULT TAB
 -- ==================================================
+
 Loading.Update(92)
 
 if _G.XENONBYTE_TabsManager then
@@ -264,19 +327,22 @@ end
 Loading.Update(95)
 
 -- ==================================================
--- LOAD ANTI CHEAT
+-- ANTI CHEAT
 -- ==================================================
+
 Loading.Update(98)
-loadstring(GetScript("Features/BypassAntiCheat.lua"))()
+LoadScript("Features/BypassAntiCheat.lua")
 
 -- ==================================================
--- WAIT 2 SECONDS THEN APPLY CONFIG
+-- APPLY CONFIG
 -- ==================================================
-print("Waiting 2s before applying config...")
+
+Log("Waiting 2 seconds before applying config...")
+
 task.wait(2)
 
 if _G.XENONBYTE_ConfigSystem then
-    print("Applying Config...")
+    Log("Applying Config...")
     _G.XENONBYTE_ConfigSystem.Load()
 end
 
@@ -286,5 +352,5 @@ task.wait(0.3)
 
 Loading.Destroy()
 
-print("Loading Screen Closed!")
-print("XENONBYTE HUB | Ready!")
+Log("Loading Screen Closed!")
+Log("XENONBYTE HUB | Ready!")
