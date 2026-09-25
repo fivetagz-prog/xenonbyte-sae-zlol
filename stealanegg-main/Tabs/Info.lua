@@ -47,7 +47,7 @@ local LinkBtn = Instance.new("TextButton")
 LinkBtn.Size = UDim2.new(1, 0, 0, 30)
 LinkBtn.BackgroundColor3 = Color3.fromRGB(28, 29, 42)
 LinkBtn.BorderSizePixel = 0
-LinkBtn.Text = "Link : https://discord.gg/aKeK6avatS"
+LinkBtn.Text = "Discord Link : https://discord.gg/tFgmr4H5Qn"
 LinkBtn.TextColor3 = Color3.fromRGB(225, 225, 225)
 LinkBtn.TextSize = 12
 LinkBtn.TextXAlignment = Enum.TextXAlignment.Left
@@ -99,7 +99,7 @@ CopyStroke.Parent = CopyBtn
 -- ==================================================
 -- COPY FUNCTION
 -- ==================================================
-local DISCORD_LINK = "https://discord.gg/aKeK6avatS"
+local DISCORD_LINK = "https://discord.gg/tFgmr4H5Qn"
 
 local function CopyDiscord()
     local Success = pcall(function()
