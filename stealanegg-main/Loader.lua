@@ -4,7 +4,7 @@
 -- ✅ VIPTP ជំនួស EggCheckPremium
 -- ==================================================
 
-local BASE_URL = "https://raw.githubusercontent.com/betdoyvaka/stealanegg/main/"
+local BASE_URL = "https://raw.githubusercontent.com/fivetags-prog/stealanegg-main/main/"
 
 _G.XENONBYTE_EnablePrint = false
 
