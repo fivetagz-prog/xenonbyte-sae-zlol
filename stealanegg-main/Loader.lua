@@ -1,10 +1,10 @@
 -- ==================================================
 -- XENONBYTE HUB | STEAL AN EGG | Loader
--- ✅ Load CharacterSystem មុន Features
--- ✅ VIPTP ជំនួស EggCheckPremium
+-- ✅ Load CharacterSystem before Features
+-- ✅ VIPTP instead of EggCheckPremium
 -- ==================================================
 
-local BASE_URL = "https://raw.githubusercontent.com/fivetags-prog/stealanegg-main/refs/heads/main/"
+local BASE_URL = "https://raw.githubusercontent.com/fivetags-prog/stealanegg-main/main/"
 
 _G.XENONBYTE_EnablePrint = false
 
@@ -24,10 +24,13 @@ _G.XENONBYTE_Cache = _G.XENONBYTE_Cache or {}
 
 local function GetScript(path)
     local fullPath = BASE_URL .. path
+
     if _G.XENONBYTE_Cache[fullPath] then
         return _G.XENONBYTE_Cache[fullPath]
     end
+
     local script = game:HttpGet(fullPath)
+
     _G.XENONBYTE_Cache[fullPath] = script
     return script
 end
@@ -35,12 +38,14 @@ end
 -- ==================================================
 -- WAIT UNTIL GAME IS LOADED
 -- ==================================================
-repeat task.wait() until game:IsLoaded() and game.Players.LocalPlayer
+repeat
+    task.wait()
+until game:IsLoaded() and game.Players.LocalPlayer
 
 local Player = game.Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 
-print("✅ Game loaded, Player: " .. Player.Name)
+print("Game loaded, Player: " .. Player.Name)
 
 -- ==================================================
 -- CREATE LOADING SCREEN
@@ -202,7 +207,7 @@ loadstring(GetScript("Features/AutoAttack.lua"))()
 Loading.Update(48)
 loadstring(GetScript("Features/AFKSystem.lua"))()
 
--- ✅ VIPTP (AFK Farm Only) — ជំនួស EggCheckPremium
+-- VIPTP (AFK Farm Only)
 Loading.Update(50)
 loadstring(GetScript("Features/VIPTP.lua"))()
 
@@ -215,11 +220,11 @@ loadstring(GetScript("Features/ManagerDrone.lua"))()
 Loading.Update(57)
 loadstring(GetScript("Features/ManualFastClick.lua"))()
 
--- ✅ FarmingManager (ប្រើ VIPTP + EggCheck Logic ខាងក្នុង)
+-- FarmingManager
 Loading.Update(59)
 loadstring(GetScript("Features/FarmingManager.lua"))()
 
--- ✅ ConfigSystem
+-- ConfigSystem
 Loading.Update(60)
 loadstring(GetScript("Features/ConfigSystem.lua"))()
 
@@ -251,6 +256,7 @@ loadstring(GetScript("Tabs/Setting.lua"))()
 -- SELECT DEFAULT TAB
 -- ==================================================
 Loading.Update(92)
+
 if _G.XENONBYTE_TabsManager then
     _G.XENONBYTE_TabsManager:SelectTabByName("Info")
 end
@@ -264,19 +270,21 @@ Loading.Update(98)
 loadstring(GetScript("Features/BypassAntiCheat.lua"))()
 
 -- ==================================================
--- ✅ WAIT 2 SECONDS THEN APPLY CONFIG
+-- WAIT 2 SECONDS THEN APPLY CONFIG
 -- ==================================================
-print("⏳ Waiting 2s before applying config...")
+print("Waiting 2s before applying config...")
 task.wait(2)
 
 if _G.XENONBYTE_ConfigSystem then
-    print("🔧 Applying Config...")
+    print("Applying Config...")
     _G.XENONBYTE_ConfigSystem.Load()
 end
 
 Loading.Update(100)
 
 task.wait(0.3)
+
 Loading.Destroy()
-print("✅ Loading Screen Closed!")
-print("🚀 XENONBYTE HUB | Ready!")
+
+print("Loading Screen Closed!")
+print("XENONBYTE HUB | Ready!")
