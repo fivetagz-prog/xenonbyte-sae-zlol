@@ -2,24 +2,18 @@
 -- XENONBYTE HUB | STEAL AN EGG | Loader
 -- ==================================================
 
-local BASE_URL =
-    "https://raw.githubusercontent.com/fivetagz-prog/xenonbyte-sae-zlol/main/stealanegg-main/"
+local BASE_URL = "https://raw.githubusercontent.com/fivetagz-prog/xenonbyte-sae-zlol/main/stealanegg-main/"
 
 _G.XENONBYTE_EnablePrint = false
 
 local oldPrint = print
-
 print = function(...)
     if _G.XENONBYTE_EnablePrint then
         oldPrint(...)
     end
 end
 
-local function Log(...)
-    oldPrint("[XENONBYTE]", ...)
-end
-
-Log("Loading XenonByte...")
+print("Loading XenonByte...")
 
 -- ==================================================
 -- CACHE SYSTEM
@@ -34,50 +28,11 @@ local function GetScript(path)
         return _G.XENONBYTE_Cache[fullPath]
     end
 
-    Log("Loading:", path)
+    local script = game:HttpGet(fullPath)
 
-    local success, result = pcall(function()
-        return game:HttpGet(fullPath)
-    end)
+    _G.XENONBYTE_Cache[fullPath] = script
 
-    if not success then
-        error(
-            "\n[XENONBYTE] FAILED TO LOAD FILE\n" ..
-            "File: " .. tostring(path) .. "\n" ..
-            "URL: " .. tostring(fullPath) .. "\n" ..
-            "Error: " .. tostring(result)
-        )
-    end
-
-    if not result or result == "" then
-        error(
-            "\n[XENONBYTE] EMPTY FILE\n" ..
-            "File: " .. tostring(path) .. "\n" ..
-            "URL: " .. tostring(fullPath)
-        )
-    end
-
-    _G.XENONBYTE_Cache[fullPath] = result
-
-    return result
-end
-
-local function LoadScript(path)
-    local source = GetScript(path)
-
-    local success, result = pcall(function()
-        return loadstring(source)()
-    end)
-
-    if not success then
-        error(
-            "\n[XENONBYTE] LUA ERROR\n" ..
-            "File: " .. tostring(path) .. "\n" ..
-            "Error: " .. tostring(result)
-        )
-    end
-
-    return result
+    return script
 end
 
 -- ==================================================
@@ -91,7 +46,7 @@ until game:IsLoaded() and game.Players.LocalPlayer
 local Player = game.Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 
-Log("Game loaded:", Player.Name)
+print("Game loaded, Player: " .. Player.Name)
 
 -- ==================================================
 -- CREATE LOADING SCREEN
@@ -190,6 +145,7 @@ local function CreateLoadingScreen()
     Percent.Parent = Container
 
     local function UpdateProgress(percent)
+
         percent = math.clamp(percent, 0, 100)
 
         Bar.Size = UDim2.new(
@@ -200,6 +156,7 @@ local function CreateLoadingScreen()
         )
 
         Percent.Text = math.floor(percent) .. "%"
+
     end
 
     return {
@@ -208,114 +165,120 @@ local function CreateLoadingScreen()
         Update = UpdateProgress,
 
         Destroy = function()
+
             if LoadingGui then
                 LoadingGui:Destroy()
             end
+
         end
     }
-end
 
--- ==================================================
--- LOADING SCREEN
--- ==================================================
+end
 
 local Loading = CreateLoadingScreen()
 
 Loading.Update(5)
 
 -- ==================================================
--- CORE
+-- LOAD CORE FILES
 -- ==================================================
 
 Loading.Update(10)
-LoadScript("Config.lua")
+loadstring(GetScript("Config.lua"))()
 
 Loading.Update(15)
-LoadScript("UI.lua")
+loadstring(GetScript("UI.lua"))()
 
 Loading.Update(20)
-LoadScript("Components.lua")
+loadstring(GetScript("Components.lua"))()
+
+-- ==================================================
+-- CHARACTER SYSTEM
+-- ==================================================
+
+Loading.Update(23)
+loadstring(GetScript("Features/CharacterSystem.lua"))()
 
 -- ==================================================
 -- TABS MANAGER
 -- ==================================================
 
 Loading.Update(25)
-LoadScript("Tabs/Init.lua")
+loadstring(GetScript("Tabs/Init.lua"))()
 
 -- ==================================================
 -- FEATURES
 -- ==================================================
 
 Loading.Update(28)
-LoadScript("Features/AntiAFK.lua")
+loadstring(GetScript("Features/AntiAFK.lua"))()
 
 Loading.Update(30)
-LoadScript("Features/WalkSpeed.lua")
+loadstring(GetScript("Features/WalkSpeed.lua"))()
 
 Loading.Update(33)
-LoadScript("Features/AntiTrap.lua")
+loadstring(GetScript("Features/AntiTrap.lua"))()
 
 Loading.Update(36)
-LoadScript("Features/GodMode.lua")
+loadstring(GetScript("Features/GodMode.lua"))()
 
 Loading.Update(39)
-LoadScript("Features/TeleportSystem.lua")
+loadstring(GetScript("Features/TeleportSystem.lua"))()
 
 Loading.Update(42)
-LoadScript("Features/AutoFarm.lua")
+loadstring(GetScript("Features/AutoFarm.lua"))()
 
 Loading.Update(45)
-LoadScript("Features/AutoAttack.lua")
+loadstring(GetScript("Features/AutoAttack.lua"))()
 
 Loading.Update(48)
-LoadScript("Features/AFKSystem.lua")
+loadstring(GetScript("Features/AFKSystem.lua"))()
 
 Loading.Update(50)
-LoadScript("Features/VIPTP.lua")
+loadstring(GetScript("Features/VIPTP.lua"))()
 
 Loading.Update(51)
-LoadScript("Features/AttackDrone.lua")
+loadstring(GetScript("Features/AttackDrone.lua"))()
 
 Loading.Update(54)
-LoadScript("Features/ManagerDrone.lua")
+loadstring(GetScript("Features/ManagerDrone.lua"))()
 
 Loading.Update(57)
-LoadScript("Features/ManualFastClick.lua")
+loadstring(GetScript("Features/ManualFastClick.lua"))()
 
 Loading.Update(59)
-LoadScript("Features/FarmingManager.lua")
+loadstring(GetScript("Features/FarmingManager.lua"))()
 
 Loading.Update(60)
-LoadScript("Features/ConfigSystem.lua")
+loadstring(GetScript("Features/ConfigSystem.lua"))()
 
 -- ==================================================
--- TABS
+-- LOAD TABS
 -- ==================================================
 
 Loading.Update(62)
-LoadScript("Tabs/Info.lua")
+loadstring(GetScript("Tabs/Info.lua"))()
 
 Loading.Update(65)
-LoadScript("Tabs/Farming.lua")
+loadstring(GetScript("Tabs/Farming.lua"))()
 
 Loading.Update(70)
-LoadScript("Tabs/Combat.lua")
+loadstring(GetScript("Tabs/Combat.lua"))()
 
 Loading.Update(75)
-LoadScript("Tabs/AutoFarming.lua")
+loadstring(GetScript("Tabs/AutoFarming.lua"))()
 
 Loading.Update(80)
-LoadScript("Tabs/Event.lua")
+loadstring(GetScript("Tabs/Event.lua"))()
 
 Loading.Update(85)
-LoadScript("Tabs/HopServer.lua")
+loadstring(GetScript("Tabs/HopServer.lua"))()
 
 Loading.Update(90)
-LoadScript("Tabs/Setting.lua")
+loadstring(GetScript("Tabs/Setting.lua"))()
 
 -- ==================================================
--- DEFAULT TAB
+-- SELECT DEFAULT TAB
 -- ==================================================
 
 Loading.Update(92)
@@ -331,19 +294,22 @@ Loading.Update(95)
 -- ==================================================
 
 Loading.Update(98)
-LoadScript("Features/BypassAntiCheat.lua")
+loadstring(GetScript("Features/BypassAntiCheat.lua"))()
 
 -- ==================================================
 -- APPLY CONFIG
 -- ==================================================
 
-Log("Waiting 2 seconds before applying config...")
+print("Waiting 2s before applying config...")
 
 task.wait(2)
 
 if _G.XENONBYTE_ConfigSystem then
-    Log("Applying Config...")
+
+    print("Applying Config...")
+
     _G.XENONBYTE_ConfigSystem.Load()
+
 end
 
 Loading.Update(100)
@@ -352,5 +318,5 @@ task.wait(0.3)
 
 Loading.Destroy()
 
-Log("Loading Screen Closed!")
-Log("XENONBYTE HUB | Ready!")
+print("Loading Screen Closed!")
+print("XENONBYTE HUB | Ready!")
