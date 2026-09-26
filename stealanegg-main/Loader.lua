@@ -13,12 +13,11 @@ print = function(...)
     end
 end
 
-print("Loading XenonByte...")
+oldPrint("Loading XenonByte...")
 
 -- ==================================================
 -- CACHE SYSTEM
 -- ==================================================
-
 _G.XENONBYTE_Cache = _G.XENONBYTE_Cache or {}
 
 local function GetScript(path)
@@ -28,17 +27,55 @@ local function GetScript(path)
         return _G.XENONBYTE_Cache[fullPath]
     end
 
-    local script = game:HttpGet(fullPath)
+    local Success, Result = pcall(function()
+        return game:HttpGet(fullPath)
+    end)
 
-    _G.XENONBYTE_Cache[fullPath] = script
+    if not Success then
+        error("[XENONBYTE] Failed to download: " .. path .. "\n" .. tostring(Result))
+    end
 
-    return script
+    if not Result or Result == "" then
+        error("[XENONBYTE] Empty response: " .. path)
+    end
+
+    _G.XENONBYTE_Cache[fullPath] = Result
+
+    return Result
+end
+
+local function LoadScript(path)
+    oldPrint("[XENONBYTE] Loading: " .. path)
+
+    local Source = GetScript(path)
+
+    local Success, Result = pcall(function()
+        local Function = loadstring(Source)
+
+        if not Function then
+            error("loadstring returned nil")
+        end
+
+        return Function()
+    end)
+
+    if not Success then
+        error(
+            "[XENONBYTE] Failed loading " ..
+            path ..
+            "\n" ..
+            tostring(Result)
+        )
+    end
+
+    oldPrint("[XENONBYTE] Loaded: " .. path)
+
+    return Result
 end
 
 -- ==================================================
 -- WAIT UNTIL GAME IS LOADED
 -- ==================================================
-
 repeat
     task.wait()
 until game:IsLoaded() and game.Players.LocalPlayer
@@ -46,12 +83,11 @@ until game:IsLoaded() and game.Players.LocalPlayer
 local Player = game.Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 
-print("Game loaded, Player: " .. Player.Name)
+oldPrint("Game loaded, Player: " .. Player.Name)
 
 -- ==================================================
 -- CREATE LOADING SCREEN
 -- ==================================================
-
 local function CreateLoadingScreen()
 
     local LoadingGui = Instance.new("ScreenGui")
@@ -145,18 +181,10 @@ local function CreateLoadingScreen()
     Percent.Parent = Container
 
     local function UpdateProgress(percent)
-
         percent = math.clamp(percent, 0, 100)
 
-        Bar.Size = UDim2.new(
-            percent / 100,
-            0,
-            1,
-            0
-        )
-
+        Bar.Size = UDim2.new(percent / 100, 0, 1, 0)
         Percent.Text = math.floor(percent) .. "%"
-
     end
 
     return {
@@ -165,16 +193,16 @@ local function CreateLoadingScreen()
         Update = UpdateProgress,
 
         Destroy = function()
-
             if LoadingGui then
                 LoadingGui:Destroy()
             end
-
         end
     }
-
 end
 
+-- ==================================================
+-- CREATE LOADING SCREEN
+-- ==================================================
 local Loading = CreateLoadingScreen()
 
 Loading.Update(5)
@@ -182,105 +210,116 @@ Loading.Update(5)
 -- ==================================================
 -- LOAD CORE FILES
 -- ==================================================
-
 Loading.Update(10)
-loadstring(GetScript("Config.lua"))()
+LoadScript("Config.lua")
 
 Loading.Update(15)
-loadstring(GetScript("UI.lua"))()
+LoadScript("UI.lua")
 
 Loading.Update(20)
-loadstring(GetScript("Components.lua"))()
+LoadScript("Components.lua")
 
 -- ==================================================
--- CHARACTER SYSTEM
+-- VERIFY COMPONENTS
 -- ==================================================
+if type(CreateTab) ~= "function" then
+    error(
+        "[XENONBYTE] CreateTab is missing after Components.lua loaded.\n" ..
+        "Components.lua did not load correctly."
+    )
+end
 
-Loading.Update(23)
-loadstring(GetScript("Features/CharacterSystem.lua"))()
+if type(CreatePage) ~= "function" then
+    error(
+        "[XENONBYTE] CreatePage is missing after Components.lua loaded.\n" ..
+        "Components.lua did not load correctly."
+    )
+end
+
+oldPrint("[XENONBYTE] Components verified.")
 
 -- ==================================================
--- TABS MANAGER
+-- LOAD TABS MANAGER
 -- ==================================================
-
 Loading.Update(25)
-loadstring(GetScript("Tabs/Init.lua"))()
+LoadScript("Tabs/Init.lua")
+
+if not _G.XENONBYTE_TabsManager then
+    error("[XENONBYTE] Tabs Manager failed to initialize.")
+end
 
 -- ==================================================
--- FEATURES
+-- LOAD FEATURES
 -- ==================================================
-
 Loading.Update(28)
-loadstring(GetScript("Features/AntiAFK.lua"))()
+LoadScript("Features/AntiAFK.lua")
 
 Loading.Update(30)
-loadstring(GetScript("Features/WalkSpeed.lua"))()
+LoadScript("Features/WalkSpeed.lua")
 
 Loading.Update(33)
-loadstring(GetScript("Features/AntiTrap.lua"))()
+LoadScript("Features/AntiTrap.lua")
 
 Loading.Update(36)
-loadstring(GetScript("Features/GodMode.lua"))()
+LoadScript("Features/GodMode.lua")
 
 Loading.Update(39)
-loadstring(GetScript("Features/TeleportSystem.lua"))()
+LoadScript("Features/TeleportSystem.lua")
 
 Loading.Update(42)
-loadstring(GetScript("Features/AutoFarm.lua"))()
+LoadScript("Features/AutoFarm.lua")
 
 Loading.Update(45)
-loadstring(GetScript("Features/AutoAttack.lua"))()
+LoadScript("Features/AutoAttack.lua")
 
 Loading.Update(48)
-loadstring(GetScript("Features/AFKSystem.lua"))()
+LoadScript("Features/AFKSystem.lua")
 
 Loading.Update(50)
-loadstring(GetScript("Features/VIPTP.lua"))()
+LoadScript("Features/VIPTP.lua")
 
 Loading.Update(51)
-loadstring(GetScript("Features/AttackDrone.lua"))()
+LoadScript("Features/AttackDrone.lua")
 
 Loading.Update(54)
-loadstring(GetScript("Features/ManagerDrone.lua"))()
+LoadScript("Features/ManagerDrone.lua")
 
 Loading.Update(57)
-loadstring(GetScript("Features/ManualFastClick.lua"))()
+LoadScript("Features/ManualFastClick.lua")
 
 Loading.Update(59)
-loadstring(GetScript("Features/FarmingManager.lua"))()
+LoadScript("Features/FarmingManager.lua")
 
 Loading.Update(60)
-loadstring(GetScript("Features/ConfigSystem.lua"))()
+LoadScript("Features/ConfigSystem.lua")
 
 -- ==================================================
 -- LOAD TABS
 -- ==================================================
-
 Loading.Update(62)
-loadstring(GetScript("Tabs/Info.lua"))()
+LoadScript("Tabs/Info.lua")
 
 Loading.Update(65)
-loadstring(GetScript("Tabs/Farming.lua"))()
+LoadScript("Tabs/Farming.lua")
 
 Loading.Update(70)
-loadstring(GetScript("Tabs/Combat.lua"))()
+LoadScript("Tabs/Combat.lua")
 
 Loading.Update(75)
-loadstring(GetScript("Tabs/AutoFarming.lua"))()
+LoadScript("Tabs/AutoFarming.lua")
 
 Loading.Update(80)
-loadstring(GetScript("Tabs/Event.lua"))()
+LoadScript("Tabs/Event.lua")
 
 Loading.Update(85)
-loadstring(GetScript("Tabs/HopServer.lua"))()
+LoadScript("Tabs/HopServer.lua")
 
 Loading.Update(90)
-loadstring(GetScript("Tabs/Setting.lua"))()
+LoadScript("Tabs/Setting.lua")
 
 -- ==================================================
 -- SELECT DEFAULT TAB
 -- ==================================================
-
 Loading.Update(92)
 
 if _G.XENONBYTE_TabsManager then
@@ -290,33 +329,41 @@ end
 Loading.Update(95)
 
 -- ==================================================
--- ANTI CHEAT
+-- LOAD ANTI CHEAT
 -- ==================================================
-
 Loading.Update(98)
-loadstring(GetScript("Features/BypassAntiCheat.lua"))()
+LoadScript("Features/BypassAntiCheat.lua")
 
 -- ==================================================
--- APPLY CONFIG
+-- WAIT BEFORE CONFIG
 -- ==================================================
-
-print("Waiting 2s before applying config...")
+oldPrint("Waiting 2 seconds before applying config...")
 
 task.wait(2)
 
 if _G.XENONBYTE_ConfigSystem then
+    oldPrint("Applying Config...")
 
-    print("Applying Config...")
+    local Success, ErrorMessage = pcall(function()
+        _G.XENONBYTE_ConfigSystem.Load()
+    end)
 
-    _G.XENONBYTE_ConfigSystem.Load()
-
+    if not Success then
+        warn(
+            "[XENONBYTE] Config Load Error: " ..
+            tostring(ErrorMessage)
+        )
+    end
 end
 
+-- ==================================================
+-- FINISH
+-- ==================================================
 Loading.Update(100)
 
 task.wait(0.3)
 
 Loading.Destroy()
 
-print("Loading Screen Closed!")
-print("XENONBYTE HUB | Ready!")
+oldPrint("Loading Screen Closed!")
+oldPrint("XENONBYTE HUB | Ready!")
