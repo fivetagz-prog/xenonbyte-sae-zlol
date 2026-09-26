@@ -1,378 +1,182 @@
---==================================================
--- XENONBYTE HUB | TAB | Low Server Hop
--- Finds a PUBLIC server with exactly 1 player
---==================================================
+-- ==================================================
+-- XENONBYTE HUB | TAB | Hop Server
+-- Feature: Auto Hop To 1 Player Public Server
+-- ==================================================
 
-local Players = game:GetService("Players")
+local TabsManager = _G.XENONBYTE_TabsManager
+local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 
-local TabsManager = _G.XENONBYTE_TabsManager
+local PLACE_ID = 107778070777162
 
-local HopServerTab, HopServerPage =
-    TabsManager:RegisterTab(
-        "Hop Server",
-        5,
-        "HOP_SERVER"
-    )
+local HopServerTab, HopServerPage = TabsManager:RegisterTab("Hop Server", 6, "HOP_SERVER")
 
---==================================================
--- SECTION
---==================================================
+-- ==================================================
+-- CONTENT
+-- ==================================================
+CreateSectionTitle(HopServerPage, "Hop Server", 1)
 
-CreateSectionTitle(
-    HopServerPage,
-    "Low Server Hop",
-    1
-)
+-- ==================================================
+-- FEATURE: Auto Hop To 1 Player
+-- ==================================================
+local FeatureHolder = Instance.new("Frame")
+FeatureHolder.Size = UDim2.new(1, 0, 0, 60)
+FeatureHolder.BackgroundColor3 = Color3.fromRGB(28, 29, 42)
+FeatureHolder.BorderSizePixel = 0
+FeatureHolder.LayoutOrder = 2
+FeatureHolder.Parent = HopServerPage
 
---==================================================
--- INFO
---==================================================
+local FeatureCorner = Instance.new("UICorner")
+FeatureCorner.CornerRadius = UDim.new(0, 8)
+FeatureCorner.Parent = FeatureHolder
 
-local Info = Instance.new("TextLabel")
+local FeatureStroke = Instance.new("UIStroke")
+FeatureStroke.Color = Color3.fromRGB(210, 210, 210)
+FeatureStroke.Thickness = 1.5
+FeatureStroke.Transparency = 0.4
+FeatureStroke.Parent = FeatureHolder
 
-Info.Size =
-    UDim2.new(1, 0, 0, 55)
+local FeatureName = Instance.new("TextLabel")
+FeatureName.Size = UDim2.new(1, -100, 0, 20)
+FeatureName.Position = UDim2.new(0, 12, 0, 10)
+FeatureName.BackgroundTransparency = 1
+FeatureName.Text = "Hop To 1 Player Server"
+FeatureName.TextColor3 = Color3.fromRGB(255, 255, 255)
+FeatureName.TextSize = 13
+FeatureName.TextXAlignment = Enum.TextXAlignment.Left
+FeatureName.Font = Enum.Font.GothamBold
+FeatureName.Parent = FeatureHolder
 
-Info.BackgroundTransparency = 1
+local FeatureStatus = Instance.new("TextLabel")
+FeatureStatus.Size = UDim2.new(1, -100, 0, 16)
+FeatureStatus.Position = UDim2.new(0, 12, 0, 32)
+FeatureStatus.BackgroundTransparency = 1
+FeatureStatus.Text = "Click to find a public server with 1 player"
+FeatureStatus.TextColor3 = Color3.fromRGB(150, 150, 170)
+FeatureStatus.TextSize = 10
+FeatureStatus.TextXAlignment = Enum.TextXAlignment.Left
+FeatureStatus.Font = Enum.Font.Gotham
+FeatureStatus.Parent = FeatureHolder
 
-Info.Text =
-    "Finds a PUBLIC server with exactly 1 player.\n" ..
-    "This does not join a private/VIP server."
+local ClickBtn = Instance.new("TextButton")
+ClickBtn.Size = UDim2.new(0, 70, 0, 30)
+ClickBtn.Position = UDim2.new(1, -82, 0.5, -15)
+ClickBtn.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+ClickBtn.BorderSizePixel = 0
+ClickBtn.Text = "Hop"
+ClickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClickBtn.TextSize = 12
+ClickBtn.Font = Enum.Font.GothamBold
+ClickBtn.AutoButtonColor = false
+ClickBtn.Parent = FeatureHolder
 
-Info.TextColor3 =
-    Color3.fromRGB(190, 190, 200)
+local ClickCorner = Instance.new("UICorner")
+ClickCorner.CornerRadius = UDim.new(0, 6)
+ClickCorner.Parent = ClickBtn
 
-Info.TextSize = 12
-Info.TextWrapped = true
-Info.Font = Enum.Font.Gotham
-Info.LayoutOrder = 2
-Info.Parent = HopServerPage
+local ClickStroke = Instance.new("UIStroke")
+ClickStroke.Color = Color3.fromRGB(140, 125, 240)
+ClickStroke.Thickness = 1.5
+ClickStroke.Transparency = 0.3
+ClickStroke.Parent = ClickBtn
 
---==================================================
--- HOP BUTTON
---==================================================
-
-local HopButton = Instance.new("TextButton")
-
-HopButton.Size =
-    UDim2.new(1, 0, 0, 44)
-
-HopButton.BackgroundColor3 =
-    Color3.fromRGB(35, 35, 35)
-
-HopButton.BorderSizePixel = 0
-
-HopButton.Text =
-    "↻  Find 1 Player Server"
-
-HopButton.TextColor3 =
-    Color3.fromRGB(255, 255, 255)
-
-HopButton.TextSize = 13
-
-HopButton.Font =
-    Enum.Font.GothamBold
-
-HopButton.AutoButtonColor = false
-
-HopButton.LayoutOrder = 3
-HopButton.Parent = HopServerPage
-
-local HopCorner = Instance.new("UICorner")
-
-HopCorner.CornerRadius =
-    UDim.new(0, 8)
-
-HopCorner.Parent =
-    HopButton
-
-local HopStroke = Instance.new("UIStroke")
-
-HopStroke.Color =
-    Color3.fromRGB(100, 100, 100)
-
-HopStroke.Thickness = 1
-
-HopStroke.Transparency = 0.25
-
-HopStroke.Parent =
-    HopButton
-
---==================================================
--- STATUS
---==================================================
-
-local Status = Instance.new("TextLabel")
-
-Status.Size =
-    UDim2.new(1, 0, 0, 30)
-
-Status.BackgroundTransparency = 1
-
-Status.Text =
-    "Ready"
-
-Status.TextColor3 =
-    Color3.fromRGB(150, 150, 160)
-
-Status.TextSize = 11
-
-Status.Font =
-    Enum.Font.Gotham
-
-Status.LayoutOrder = 4
-
-Status.Parent =
-    HopServerPage
-
---==================================================
--- HOVER
---==================================================
-
-HopButton.MouseEnter:Connect(function()
-
-    HopButton.BackgroundColor3 =
-        Color3.fromRGB(55, 55, 55)
-
+ClickBtn.MouseEnter:Connect(function()
+    TweenService:Create(ClickBtn, TweenInfo.new(0.15), {
+        BackgroundColor3 = Color3.fromRGB(125, 110, 220)
+    }):Play()
 end)
 
-HopButton.MouseLeave:Connect(function()
-
-    HopButton.BackgroundColor3 =
-        Color3.fromRGB(35, 35, 35)
-
+ClickBtn.MouseLeave:Connect(function()
+    TweenService:Create(ClickBtn, TweenInfo.new(0.15), {
+        BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+    }):Play()
 end)
 
---==================================================
--- SERVER REQUEST
---==================================================
-
-local function GetOnePlayerServer()
-
-    local PlaceId =
-        game.PlaceId
-
-    local Cursor = ""
-
-    for Page = 1, 10 do
-
-        local URL =
-            "https://games.roblox.com/v1/games/" ..
-            tostring(PlaceId) ..
-            "/servers/Public?sortOrder=Asc&limit=100"
-
-        if Cursor ~= "" then
-            URL =
-                URL ..
-                "&cursor=" ..
-                HttpService:UrlEncode(Cursor)
-        end
-
-        local Success, Result =
-            pcall(function()
-
-                return game:HttpGet(URL)
-
-            end)
-
-        if not Success then
-
-            return nil,
-                "Failed to request server list."
-
-        end
-
-        local DecodeSuccess, Data =
-            pcall(function()
-
-                return HttpService:JSONDecode(
-                    Result
-                )
-
-            end)
-
-        if not DecodeSuccess
-            or not Data
-        then
-
-            return nil,
-                "Failed to read server list."
-
-        end
-
-        if Data.data then
-
-            for _, Server in ipairs(Data.data) do
-
-                local Playing =
-                    tonumber(Server.playing)
-
-                local MaxPlayers =
-                    tonumber(Server.maxPlayers)
-
-                local ServerId =
-                    Server.id
-
-                -- Exactly 1 player
-                -- and it must be a public server
-                if Playing == 1
-                    and MaxPlayers
-                    and MaxPlayers > 1
-                    and ServerId
-                    and ServerId ~= game.JobId
-                then
-
-                    return ServerId
-
-                end
-
-            end
-
-        end
-
-        Cursor =
-            Data.nextPageCursor
-
-        if not Cursor
-            or Cursor == ""
-        then
-
-            break
-
-        end
-
-    end
-
-    return nil,
-        "No 1-player public server was found."
-
-end
-
---==================================================
--- HOP
---==================================================
-
-local Hopping = false
-
-local function HopToOnePlayerServer()
-
-    if Hopping then
-        return
-    end
-
-    Hopping = true
-
-    HopButton.Text =
-        "↻  Searching..."
-
-    Status.Text =
-        "Searching public servers..."
-
-    Status.TextColor3 =
-        Color3.fromRGB(200, 200, 200)
-
-    local ServerId, ErrorMessage =
-        GetOnePlayerServer()
-
-    if not ServerId then
-
-        HopButton.Text =
-            "✕  No Server Found"
-
-        Status.Text =
-            ErrorMessage or
-            "No 1-player public server found."
-
-        Status.TextColor3 =
-            Color3.fromRGB(255, 150, 150)
-
-        task.wait(1.5)
-
-        HopButton.Text =
-            "↻  Find 1 Player Server"
-
-        Status.Text =
-            "Ready"
-
-        Status.TextColor3 =
-            Color3.fromRGB(150, 150, 160)
-
-        Hopping = false
-
-        return
-
-    end
-
-    HopButton.Text =
-        "✓  Joining..."
-
-    Status.Text =
-        "Found public server with 1 player."
-
-    Status.TextColor3 =
-        Color3.fromRGB(150, 255, 150)
-
-    task.wait(0.25)
-
-    local TeleportSuccess, TeleportError =
-        pcall(function()
-
-            TeleportService:TeleportToPlaceInstance(
-                game.PlaceId,
-                ServerId,
-                Players.LocalPlayer
-            )
-
-        end)
-
-    if not TeleportSuccess then
-
-        warn(
-            "[XenonByte] Teleport failed:",
-            TeleportError
+-- ==================================================
+-- FETCH ONE PLAYER PUBLIC SERVER
+-- ==================================================
+local function FindOnePlayerServer()
+    local cursor = ""
+    local seen = {}
+    local maxPages = 5
+
+    for page = 1, maxPages do
+        local url = string.format(
+            "https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100&cursor=%s",
+            PLACE_ID,
+            cursor
         )
 
-        HopButton.Text =
-            "✕  Teleport Failed"
+        local success, response = pcall(function()
+            return HttpService:JSONDecode(game:HttpGet(url))
+        end)
 
-        Status.Text =
-            "Could not join the server."
+        if not success or not response or not response.data then
+            return nil
+        end
 
-        Status.TextColor3 =
-            Color3.fromRGB(255, 150, 150)
+        for _, server in ipairs(response.data) do
+            if server.playing == 1
+                and server.maxPlayers > 1
+                and server.playing < server.maxPlayers
+                and server.id ~= game.JobId
+                and not seen[server.id] then
 
-        task.wait(1.5)
+                seen[server.id] = true
+                return server
+            end
+        end
 
-        HopButton.Text =
-            "↻  Find 1 Player Server"
+        cursor = response.next_cursor or ""
 
-        Status.Text =
-            "Ready"
+        if cursor == "" then
+            break
+        end
 
-        Status.TextColor3 =
-            Color3.fromRGB(150, 150, 160)
-
+        task.wait(0.15)
     end
 
-    Hopping = false
-
+    return nil
 end
 
---==================================================
--- BUTTON
---==================================================
+-- ==================================================
+-- HOP
+-- ==================================================
+ClickBtn.MouseButton1Click:Connect(function()
 
-HopButton.MouseButton1Click:Connect(
-    HopToOnePlayerServer
-)
+    ClickBtn.Active = false
+    ClickBtn.AutoButtonColor = false
 
---==================================================
--- GLOBAL
---==================================================
+    FeatureStatus.Text = "Searching for a 1-player public server..."
+    FeatureStatus.TextColor3 = Color3.fromRGB(150, 150, 170)
 
-_G.XENONBYTE_HopServer =
-    HopToOnePlayerServer
+    local server = FindOnePlayerServer()
 
-return HopServerTab
+    if not server then
+        FeatureStatus.Text = "No 1-player public server found."
+        FeatureStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+
+        ClickBtn.Active = true
+        return
+    end
+
+    FeatureStatus.Text = "Found 1-player server. Teleporting..."
+    FeatureStatus.TextColor3 = Color3.fromRGB(0, 255, 105)
+
+    local success, err = pcall(function()
+        TeleportService:TeleportToPlaceInstance(
+            PLACE_ID,
+            server.id,
+            game.Players.LocalPlayer
+        )
+    end)
+
+    if not success then
+        FeatureStatus.Text = "Teleport failed: " .. tostring(err)
+        FeatureStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+        ClickBtn.Active = true
+    end
+end)
+
+print("✅ Hop Server Tab Loaded")
