@@ -219,7 +219,16 @@ SpeedStroke.Thickness = 1
 SpeedStroke.Transparency = 0.3
 SpeedStroke.Parent = SpeedTextBox
 
+-- ✅ Flag: User កំពុង Edit
+local IsEditingSpeed = false
+
+SpeedTextBox.Focused:Connect(function()
+    IsEditingSpeed = true
+end)
+
 SpeedTextBox.FocusLost:Connect(function()
+    IsEditingSpeed = false
+
     local Value = tonumber(SpeedTextBox.Text)
 
     if Value then
@@ -235,10 +244,25 @@ SpeedTextBox.FocusLost:Connect(function()
         if _G.XENONBYTE_ConfigSystem then
             _G.XENONBYTE_ConfigSystem.Save()
         end
+
+        print("[XENONBYTE] Teleport Speed: " .. tostring(Value))
     else
-        SpeedTextBox.Text = tostring(_G.XENONBYTE_TeleportSpeed or 300)
+        SpeedTextBox.Text = "300"
+        _G.XENONBYTE_TeleportSpeed = 300
+
+        if _G.XENONBYTE_TeleportSystem then
+            _G.XENONBYTE_TeleportSystem.SetSpeed(300)
+        end
+
+        if _G.XENONBYTE_ConfigSystem then
+            _G.XENONBYTE_ConfigSystem.Save()
+        end
     end
 end)
+
+if _G.XENONBYTE_TeleportSpeed == nil then
+    _G.XENONBYTE_TeleportSpeed = 300
+end
 
 --==================================================
 -- FEATURE 3: WALK SPEED
