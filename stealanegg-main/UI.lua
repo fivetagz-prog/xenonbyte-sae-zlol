@@ -1,62 +1,83 @@
 -- ==================================================
--- XENONBYTE HUB | STEAL AN EGG | MODERN BUBBLE UI
+-- XENONBYTE | CUSTOM MONOCHROME BUBBLE UI
 -- ==================================================
 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
+local Services = {
+    Players = game:GetService("Players"),
+    TweenService = game:GetService("TweenService"),
+    UserInputService = game:GetService("UserInputService"),
+    ContentProvider = game:GetService("ContentProvider"),
+    CoreGui = game:GetService("CoreGui"),
+}
 
 local Settings = _G.XENONBYTE
 local Theme = Settings.UI.Theme
 
-local GuiParent = CoreGui
+local GuiParent = Services.CoreGui
 
 pcall(function()
     if type(gethui) == "function" then
-        local hui = gethui()
+        local HUI = gethui()
 
-        if hui then
-            GuiParent = hui
+        if HUI then
+            GuiParent = HUI
         end
     end
 end)
 
--- ==================================================
--- REMOVE OLD UI
--- ==================================================
+--==================================================
+-- CLEAN OLD GUI
+--==================================================
 
-local function destroyOld()
+pcall(function()
 
-    for _, name in ipairs({
+    for _, Name in ipairs({
         "XENONBYTE_HUB",
         "ToggleGUI"
     }) do
 
-        local old = GuiParent:FindFirstChild(name)
+        local Old =
+            GuiParent:FindFirstChild(Name)
 
-        if old then
-            old:Destroy()
+        if Old then
+            Old:Destroy()
         end
 
     end
 
-end
+end)
 
-destroyOld()
-
--- ==================================================
+--==================================================
 -- UI HELPERS
--- ==================================================
+--==================================================
 
 local function Corner(parent, radius)
 
-    local c = Instance.new("UICorner")
+    local c =
+        Instance.new("UICorner")
 
-    c.CornerRadius = UDim.new(
-        0,
-        radius or 10
-    )
+    c.CornerRadius =
+        UDim.new(
+            0,
+            radius or 8
+        )
+
+    c.Parent = parent
+
+    return c
+
+end
+
+local function Circle(parent)
+
+    local c =
+        Instance.new("UICorner")
+
+    c.CornerRadius =
+        UDim.new(
+            1,
+            0
+        )
 
     c.Parent = parent
 
@@ -71,30 +92,29 @@ local function Stroke(
     transparency
 )
 
-    local s = Instance.new("UIStroke")
+    local st =
+        Instance.new("UIStroke")
 
-    s.Color =
-        color
-        or Color3.fromRGB(
+    st.Color =
+        color or
+        Color3.fromRGB(
             70,
             70,
             70
         )
 
-    s.Thickness =
-        thickness
-        or 1
+    st.Thickness =
+        thickness or 1
 
-    s.Transparency =
-        transparency
-        or 0
+    st.Transparency =
+        transparency or 0
 
-    s.ApplyStrokeMode =
+    st.ApplyStrokeMode =
         Enum.ApplyStrokeMode.Border
 
-    s.Parent = parent
+    st.Parent = parent
 
-    return s
+    return st
 
 end
 
@@ -105,25 +125,26 @@ local function Gradient(
     rotation
 )
 
-    local g = Instance.new("UIGradient")
+    local g =
+        Instance.new("UIGradient")
 
-    g.Color = ColorSequence.new({
+    g.Color =
+        ColorSequence.new({
 
-        ColorSequenceKeypoint.new(
-            0,
-            a
-        ),
+            ColorSequenceKeypoint.new(
+                0,
+                a
+            ),
 
-        ColorSequenceKeypoint.new(
-            1,
-            b
-        )
+            ColorSequenceKeypoint.new(
+                1,
+                b
+            ),
 
-    })
+        })
 
     g.Rotation =
-        rotation
-        or 90
+        rotation or 90
 
     g.Parent = parent
 
@@ -131,110 +152,90 @@ local function Gradient(
 
 end
 
-local function Tween(
-    object,
-    info,
-    properties
-)
+--==================================================
+-- OPEN GUI / FLOATING LOGO
+--==================================================
 
-    local tween =
-        TweenService:Create(
-            object,
-            info,
-            properties
-        )
-
-    tween:Play()
-
-    return tween
-
-end
-
--- ==================================================
--- FLOATING BUBBLE TOGGLE
--- ==================================================
-
-local ToggleGui =
+local ToggleScreenGui =
     Instance.new("ScreenGui")
 
-ToggleGui.Name =
+ToggleScreenGui.Name =
     "ToggleGUI"
 
-ToggleGui.ResetOnSpawn =
+ToggleScreenGui.ResetOnSpawn =
     false
 
-ToggleGui.IgnoreGuiInset =
+ToggleScreenGui.IgnoreGuiInset =
     true
 
-ToggleGui.ZIndexBehavior =
+ToggleScreenGui.ZIndexBehavior =
     Enum.ZIndexBehavior.Sibling
 
-ToggleGui.DisplayOrder =
-    2000
+ToggleScreenGui.DisplayOrder =
+    1001
 
-ToggleGui.Parent =
+ToggleScreenGui.Parent =
     GuiParent
 
--- ==================================================
--- BUBBLE
--- ==================================================
+--==================================================
+-- LOGO BUBBLE
+--==================================================
 
 local Toggle =
-    Instance.new("TextButton")
+    Instance.new("ImageButton")
 
 Toggle.Name =
-    "X"
+    "OpenGUI"
 
 Toggle.Size =
-    UDim2.fromOffset(
-        50,
-        50
+    UDim2.new(
+        0,
+        58,
+        0,
+        58
     )
 
 Toggle.Position =
     UDim2.new(
+        0.02,
         0,
-        16,
         0.5,
-        -25
+        -29
     )
 
 Toggle.BackgroundColor3 =
     Color3.fromRGB(
-        12,
-        12,
-        12
+        8,
+        8,
+        8
     )
+
+Toggle.BackgroundTransparency =
+    0
 
 Toggle.BorderSizePixel =
     0
 
-Toggle.Text =
-    "X"
-
-Toggle.TextColor3 =
-    Color3.fromRGB(
-        255,
-        255,
-        255
-    )
-
-Toggle.TextSize =
-    20
-
-Toggle.Font =
-    Enum.Font.GothamBlack
-
 Toggle.AutoButtonColor =
     false
 
-Toggle.Parent =
-    ToggleGui
+Toggle.Image =
+    "rbxassetid://126314624782419"
 
-Corner(
-    Toggle,
-    16
-)
+Toggle.ScaleType =
+    Enum.ScaleType.Fit
+
+Toggle.ImageTransparency =
+    0
+
+Toggle.ZIndex =
+    100
+
+Toggle.Parent =
+    ToggleScreenGui
+
+-- Perfect circular outer bubble
+Circle(Toggle)
 
 Stroke(
     Toggle,
@@ -247,24 +248,94 @@ Stroke(
     0.15
 )
 
-Gradient(
-    Toggle,
-    Color3.fromRGB(
-        42,
-        42,
-        42
-    ),
-    Color3.fromRGB(
-        5,
-        5,
-        5
-    ),
-    135
-)
+--==================================================
+-- LOGO HOLDER
+--==================================================
 
--- ==================================================
+local LogoHolder =
+    Instance.new("Frame")
+
+LogoHolder.Name =
+    "LogoHolder"
+
+LogoHolder.Size =
+    UDim2.new(
+        0,
+        48,
+        0,
+        48
+    )
+
+LogoHolder.Position =
+    UDim2.new(
+        0.5,
+        -24,
+        0.5,
+        -24
+    )
+
+LogoHolder.BackgroundTransparency =
+    1
+
+LogoHolder.BorderSizePixel =
+    0
+
+LogoHolder.ZIndex =
+    101
+
+LogoHolder.Parent =
+    Toggle
+
+--==================================================
+-- LOGO IMAGE
+--==================================================
+
+local Logo =
+    Instance.new("ImageLabel")
+
+Logo.Name =
+    "Logo"
+
+Logo.Size =
+    UDim2.new(
+        1,
+        0,
+        1,
+        0
+    )
+
+Logo.Position =
+    UDim2.new(
+        0,
+        0,
+        0,
+        0
+    )
+
+Logo.BackgroundTransparency =
+    1
+
+Logo.BorderSizePixel =
+    0
+
+Logo.Image =
+    "rbxassetid://126314624782419"
+
+Logo.ScaleType =
+    Enum.ScaleType.Fit
+
+Logo.ImageTransparency =
+    0
+
+Logo.ZIndex =
+    102
+
+Logo.Parent =
+    LogoHolder
+
+--==================================================
 -- MAIN WINDOW
--- ==================================================
+--==================================================
 
 local ScreenGui =
     Instance.new("ScreenGui")
@@ -282,14 +353,14 @@ ScreenGui.ZIndexBehavior =
     Enum.ZIndexBehavior.Sibling
 
 ScreenGui.DisplayOrder =
-    1500
+    999
 
 ScreenGui.Parent =
     GuiParent
 
--- ==================================================
+--==================================================
 -- MAIN
--- ==================================================
+--==================================================
 
 local Main =
     Instance.new("Frame")
@@ -298,8 +369,10 @@ Main.Name =
     "Main"
 
 Main.Size =
-    UDim2.fromOffset(
+    UDim2.new(
+        0,
         Settings.UI.Width,
+        0,
         Settings.UI.Height
     )
 
@@ -328,26 +401,26 @@ Main.Parent =
 
 Corner(
     Main,
-    18
+    14
 )
 
 Stroke(
     Main,
     Color3.fromRGB(
-        100,
-        100,
-        100
+        90,
+        90,
+        90
     ),
-    1.25,
-    0.12
+    1.5,
+    0.1
 )
 
 Gradient(
     Main,
     Color3.fromRGB(
-        18,
-        18,
-        18
+        15,
+        15,
+        15
     ),
     Color3.fromRGB(
         4,
@@ -357,46 +430,9 @@ Gradient(
     135
 )
 
--- ==================================================
--- TOP HIGHLIGHT
--- ==================================================
-
-local Highlight =
-    Instance.new("Frame")
-
-Highlight.Size =
-    UDim2.new(
-        1,
-        -2,
-        0,
-        1
-    )
-
-Highlight.Position =
-    UDim2.fromOffset(
-        1,
-        1
-    )
-
-Highlight.BackgroundColor3 =
-    Color3.fromRGB(
-        255,
-        255,
-        255
-    )
-
-Highlight.BackgroundTransparency =
-    0.78
-
-Highlight.BorderSizePixel =
-    0
-
-Highlight.Parent =
-    Main
-
--- ==================================================
+--==================================================
 -- HEADER
--- ==================================================
+--==================================================
 
 local TopBar =
     Instance.new("Frame")
@@ -409,7 +445,7 @@ TopBar.Size =
         1,
         0,
         0,
-        70
+        62
     )
 
 TopBar.BackgroundColor3 =
@@ -442,91 +478,123 @@ Gradient(
     90
 )
 
--- ==================================================
--- HEADER ICON
--- ==================================================
+--==================================================
+-- HEADER LOGO
+--==================================================
 
-local HeaderIcon =
-    Instance.new("TextLabel")
+local HeaderLogoHolder =
+    Instance.new("Frame")
 
-HeaderIcon.Size =
-    UDim2.fromOffset(
-        42,
-        42
+HeaderLogoHolder.Size =
+    UDim2.new(
+        0,
+        38,
+        0,
+        38
     )
 
-HeaderIcon.Position =
-    UDim2.fromOffset(
-        14,
-        14
+HeaderLogoHolder.Position =
+    UDim2.new(
+        0,
+        12,
+        0,
+        12
     )
 
-HeaderIcon.BackgroundColor3 =
+HeaderLogoHolder.BackgroundColor3 =
     Color3.fromRGB(
         245,
         245,
         245
     )
 
-HeaderIcon.Text =
-    "X"
+HeaderLogoHolder.BorderSizePixel =
+    0
 
-HeaderIcon.TextColor3 =
-    Color3.fromRGB(
-        8,
-        8,
-        8
-    )
-
-HeaderIcon.TextSize =
-    20
-
-HeaderIcon.Font =
-    Enum.Font.GothamBlack
-
-HeaderIcon.ZIndex =
+HeaderLogoHolder.ZIndex =
     22
 
-HeaderIcon.Parent =
+HeaderLogoHolder.Parent =
     TopBar
 
-Corner(
-    HeaderIcon,
-    12
+Circle(
+    HeaderLogoHolder
 )
 
--- ==================================================
+local HeaderLogo =
+    Instance.new("ImageLabel")
+
+HeaderLogo.Size =
+    UDim2.new(
+        1,
+        -6,
+        1,
+        -6
+    )
+
+HeaderLogo.Position =
+    UDim2.new(
+        0,
+        3,
+        0,
+        3
+    )
+
+HeaderLogo.BackgroundTransparency =
+    1
+
+HeaderLogo.BorderSizePixel =
+    0
+
+HeaderLogo.Image =
+    "rbxassetid://126314624782419"
+
+HeaderLogo.ScaleType =
+    Enum.ScaleType.Fit
+
+HeaderLogo.ZIndex =
+    23
+
+HeaderLogo.Parent =
+    HeaderLogoHolder
+
+--==================================================
 -- TITLE
--- ==================================================
+--==================================================
 
 local Title =
     Instance.new("TextLabel")
 
+Title.Name =
+    "Title"
+
 Title.Size =
     UDim2.new(
         1,
-        -175,
+        -65,
         0,
-        25
+        26
     )
 
 Title.Position =
-    UDim2.fromOffset(
-        68,
-        10
+    UDim2.new(
+        0,
+        58,
+        0,
+        9
     )
 
 Title.BackgroundTransparency =
     1
 
 Title.Text =
-    "XENONBYTE"
+    Settings.Name
 
 Title.TextColor3 =
     Theme.Text
 
 Title.TextSize =
-    18
+    17
 
 Title.TextXAlignment =
     Enum.TextXAlignment.Left
@@ -535,37 +603,42 @@ Title.Font =
     Enum.Font.GothamBold
 
 Title.ZIndex =
-    22
+    21
 
 Title.Parent =
     TopBar
 
--- ==================================================
+--==================================================
 -- SUBTITLE
--- ==================================================
+--==================================================
 
 local Subtitle =
     Instance.new("TextLabel")
 
+Subtitle.Name =
+    "Subtitle"
+
 Subtitle.Size =
     UDim2.new(
         1,
-        -175,
+        -65,
         0,
         18
     )
 
 Subtitle.Position =
-    UDim2.fromOffset(
-        68,
-        36
+    UDim2.new(
+        0,
+        58,
+        0,
+        34
     )
 
 Subtitle.BackgroundTransparency =
     1
 
 Subtitle.Text =
-    "STEAL AN EGG  •  VIP UNLOCKED"
+    Settings.Version
 
 Subtitle.TextColor3 =
     Theme.SubText
@@ -580,129 +653,14 @@ Subtitle.Font =
     Enum.Font.GothamMedium
 
 Subtitle.ZIndex =
-    22
+    21
 
 Subtitle.Parent =
     TopBar
 
--- ==================================================
--- STATUS
--- ==================================================
-
-local Status =
-    Instance.new("TextLabel")
-
-Status.Size =
-    UDim2.fromOffset(
-        72,
-        24
-    )
-
-Status.Position =
-    UDim2.new(
-        1,
-        -122,
-        0,
-        12
-    )
-
-Status.BackgroundColor3 =
-    Color3.fromRGB(
-        24,
-        24,
-        24
-    )
-
-Status.Text =
-    "●  ONLINE"
-
-Status.TextColor3 =
-    Color3.fromRGB(
-        235,
-        235,
-        235
-    )
-
-Status.TextSize =
-    8
-
-Status.Font =
-    Enum.Font.GothamBold
-
-Status.ZIndex =
-    22
-
-Status.Parent =
-    TopBar
-
-Corner(
-    Status,
-    12
-)
-
-Stroke(
-    Status,
-    Color3.fromRGB(
-        100,
-        100,
-        100
-    ),
-    1,
-    0.25
-)
-
--- ==================================================
--- CLOSE
--- ==================================================
-
-local Close =
-    Instance.new("TextButton")
-
-Close.Size =
-    UDim2.fromOffset(
-        28,
-        24
-    )
-
-Close.Position =
-    UDim2.new(
-        1,
-        -40,
-        0,
-        12
-    )
-
-Close.BackgroundTransparency =
-    1
-
-Close.Text =
-    "×"
-
-Close.TextColor3 =
-    Color3.fromRGB(
-        180,
-        180,
-        180
-    )
-
-Close.TextSize =
-    20
-
-Close.Font =
-    Enum.Font.GothamMedium
-
-Close.AutoButtonColor =
-    false
-
-Close.ZIndex =
-    25
-
-Close.Parent =
-    TopBar
-
--- ==================================================
+--==================================================
 -- HEADER LINE
--- ==================================================
+--==================================================
 
 local TopLine =
     Instance.new("Frame")
@@ -725,13 +683,10 @@ TopLine.Position =
 
 TopLine.BackgroundColor3 =
     Color3.fromRGB(
-        90,
-        90,
-        90
+        120,
+        120,
+        120
     )
-
-TopLine.BackgroundTransparency =
-    0.35
 
 TopLine.BorderSizePixel =
     0
@@ -742,9 +697,9 @@ TopLine.ZIndex =
 TopLine.Parent =
     TopBar
 
--- ==================================================
+--==================================================
 -- SIDEBAR
--- ==================================================
+--==================================================
 
 local Sidebar =
     Instance.new("Frame")
@@ -757,13 +712,15 @@ Sidebar.Size =
         0,
         Settings.UI.SidebarWidth,
         1,
-        -70
+        -62
     )
 
 Sidebar.Position =
-    UDim2.fromOffset(
+    UDim2.new(
         0,
-        70
+        0,
+        0,
+        62
     )
 
 Sidebar.BackgroundColor3 =
@@ -781,21 +738,21 @@ Sidebar.Parent =
 Gradient(
     Sidebar,
     Color3.fromRGB(
-        22,
-        22,
-        22
+        20,
+        20,
+        20
     ),
     Color3.fromRGB(
-        7,
-        7,
-        7
+        8,
+        8,
+        8
     ),
     90
 )
 
--- ==================================================
--- NAVIGATION TITLE
--- ==================================================
+--==================================================
+-- MENU TITLE
+--==================================================
 
 local SideTitle =
     Instance.new("TextLabel")
@@ -803,32 +760,34 @@ local SideTitle =
 SideTitle.Size =
     UDim2.new(
         1,
-        -24,
+        -20,
         0,
-        20
+        22
     )
 
 SideTitle.Position =
-    UDim2.fromOffset(
-        12,
-        12
+    UDim2.new(
+        0,
+        10,
+        0,
+        9
     )
 
 SideTitle.BackgroundTransparency =
     1
 
 SideTitle.Text =
-    "NAVIGATION"
+    "MENU"
 
 SideTitle.TextColor3 =
     Color3.fromRGB(
-        115,
-        115,
-        115
+        125,
+        125,
+        125
     )
 
 SideTitle.TextSize =
-    8
+    9
 
 SideTitle.Font =
     Enum.Font.GothamBold
@@ -842,9 +801,9 @@ SideTitle.ZIndex =
 SideTitle.Parent =
     Sidebar
 
--- ==================================================
+--==================================================
 -- TAB SCROLL
--- ==================================================
+--==================================================
 
 local TabScroll =
     Instance.new("ScrollingFrame")
@@ -857,13 +816,15 @@ TabScroll.Size =
         1,
         0,
         1,
-        -42
+        -38
     )
 
 TabScroll.Position =
-    UDim2.fromOffset(
+    UDim2.new(
         0,
-        36
+        0,
+        0,
+        32
     )
 
 TabScroll.BackgroundTransparency =
@@ -898,10 +859,6 @@ TabScroll.ZIndex =
 TabScroll.Parent =
     Sidebar
 
--- ==================================================
--- TAB PADDING
--- ==================================================
-
 local TabPadding =
     Instance.new("UIPadding")
 
@@ -914,27 +871,23 @@ TabPadding.PaddingTop =
 TabPadding.PaddingBottom =
     UDim.new(
         0,
-        8
+        6
     )
 
 TabPadding.PaddingLeft =
     UDim.new(
         0,
-        9
+        7
     )
 
 TabPadding.PaddingRight =
     UDim.new(
         0,
-        9
+        7
     )
 
 TabPadding.Parent =
     TabScroll
-
--- ==================================================
--- TAB LIST
--- ==================================================
 
 local TabList =
     Instance.new("UIListLayout")
@@ -942,7 +895,7 @@ local TabList =
 TabList.Padding =
     UDim.new(
         0,
-        6
+        5
     )
 
 TabList.SortOrder =
@@ -951,9 +904,9 @@ TabList.SortOrder =
 TabList.Parent =
     TabScroll
 
--- ==================================================
+--==================================================
 -- CONTENT
--- ==================================================
+--==================================================
 
 local Content =
     Instance.new("Frame")
@@ -966,7 +919,7 @@ Content.Size =
         1,
         -Settings.UI.SidebarWidth,
         1,
-        -70
+        -62
     )
 
 Content.Position =
@@ -974,7 +927,7 @@ Content.Position =
         0,
         Settings.UI.SidebarWidth,
         0,
-        70
+        62
     )
 
 Content.BackgroundColor3 =
@@ -992,9 +945,9 @@ Content.Parent =
 Gradient(
     Content,
     Color3.fromRGB(
-        14,
-        14,
-        14
+        12,
+        12,
+        12
     ),
     Color3.fromRGB(
         3,
@@ -1004,43 +957,9 @@ Gradient(
     135
 )
 
--- ==================================================
--- CONTENT PADDING
--- ==================================================
-
-local ContentPadding =
-    Instance.new("UIPadding")
-
-ContentPadding.PaddingTop =
-    UDim.new(
-        0,
-        5
-    )
-
-ContentPadding.PaddingBottom =
-    UDim.new(
-        0,
-        5
-    )
-
-ContentPadding.PaddingLeft =
-    UDim.new(
-        0,
-        5
-    )
-
-ContentPadding.PaddingRight =
-    UDim.new(
-        0,
-        5
-    )
-
-ContentPadding.Parent =
-    Content
-
--- ==================================================
+--==================================================
 -- GLOBAL REFERENCES
--- ==================================================
+--==================================================
 
 _G.XENONBYTE_Main =
     Main
@@ -1066,9 +985,12 @@ _G.XENONBYTE_Toggle =
 _G.XENONBYTE_GuiParent =
     GuiParent
 
--- ==================================================
--- DRAG SYSTEM
--- ==================================================
+_G.XENONBYTE_OpenGuiLogo =
+    Logo
+
+--==================================================
+-- MAIN WINDOW DRAG
+--==================================================
 
 local function BindDrag(
     handle,
@@ -1076,26 +998,26 @@ local function BindDrag(
 )
 
     local dragging = false
-    local dragStart
-    local startPos
-    local activeTouch
+    local dragStart = nil
+    local startPos = nil
+    local activeTouch = nil
 
     handle.InputBegan:Connect(
         function(input)
 
             if
-                input.UserInputType
-                    == Enum.UserInputType.MouseButton1
+                input.UserInputType ==
+                    Enum.UserInputType.MouseButton1
                 or
-                input.UserInputType
-                    == Enum.UserInputType.Touch
+                input.UserInputType ==
+                    Enum.UserInputType.Touch
             then
 
                 dragging = true
 
                 activeTouch =
-                    input.UserInputType
-                        == Enum.UserInputType.Touch
+                    input.UserInputType ==
+                        Enum.UserInputType.Touch
                     and input
                     or nil
 
@@ -1110,7 +1032,7 @@ local function BindDrag(
         end
     )
 
-    UserInputService.InputChanged:Connect(
+    Services.UserInputService.InputChanged:Connect(
         function(input)
 
             if not dragging then
@@ -1118,56 +1040,65 @@ local function BindDrag(
             end
 
             if
-                input.UserInputType
-                    == Enum.UserInputType.Touch
-                and activeTouch
-                and input ~= activeTouch
+                input.UserInputType ==
+                    Enum.UserInputType.Touch
+                and
+                activeTouch
+                and
+                input ~= activeTouch
             then
+
                 return
+
             end
 
             if
-                input.UserInputType
-                    ~= Enum.UserInputType.MouseMovement
+                input.UserInputType ~=
+                    Enum.UserInputType.MouseMovement
                 and
-                input.UserInputType
-                    ~= Enum.UserInputType.Touch
+                input.UserInputType ~=
+                    Enum.UserInputType.Touch
             then
+
                 return
+
             end
 
             local delta =
-                input.Position
-                - dragStart
+                input.Position -
+                dragStart
 
             target.Position =
                 UDim2.new(
                     startPos.X.Scale,
-                    startPos.X.Offset
-                        + delta.X,
+                    startPos.X.Offset +
+                        delta.X,
 
                     startPos.Y.Scale,
-                    startPos.Y.Offset
-                        + delta.Y
+                    startPos.Y.Offset +
+                        delta.Y
                 )
 
         end
     )
 
-    UserInputService.InputEnded:Connect(
+    Services.UserInputService.InputEnded:Connect(
         function(input)
 
             if
-                input.UserInputType
-                    == Enum.UserInputType.MouseButton1
+                input.UserInputType ==
+                    Enum.UserInputType.MouseButton1
                 or
                 (
                     activeTouch
-                    and input == activeTouch
+                    and
+                    input == activeTouch
                 )
             then
 
                 dragging = false
+                dragStart = nil
+                startPos = nil
                 activeTouch = nil
 
             end
@@ -1182,123 +1113,31 @@ BindDrag(
     Main
 )
 
--- ==================================================
--- SHOW / HIDE
--- ==================================================
-
-local isVisible = true
-
-local function SetVisible(value)
-
-    isVisible = value
-
-    ScreenGui.Enabled =
-        value
-
-end
-
-Toggle.MouseButton1Click:Connect(
-    function()
-
-        SetVisible(
-            not isVisible
-        )
-
-        Tween(
-            Toggle,
-
-            TweenInfo.new(
-                0.12,
-                Enum.EasingStyle.Quad,
-                Enum.EasingDirection.Out
-            ),
-
-            {
-                Rotation =
-                    isVisible
-                    and 0
-                    or 90
-            }
-        )
-
-    end
-)
-
-Close.MouseButton1Click:Connect(
-    function()
-
-        SetVisible(false)
-
-    end
-)
-
--- ==================================================
--- CLOSE HOVER
--- ==================================================
-
-Close.MouseEnter:Connect(
-    function()
-
-        Tween(
-            Close,
-            TweenInfo.new(0.1),
-            {
-                TextColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
-            }
-        )
-
-    end
-)
-
-Close.MouseLeave:Connect(
-    function()
-
-        Tween(
-            Close,
-            TweenInfo.new(0.1),
-            {
-                TextColor3 =
-                    Color3.fromRGB(
-                        180,
-                        180,
-                        180
-                    )
-            }
-        )
-
-    end
-)
-
--- ==================================================
--- BUBBLE DRAGGING
--- ==================================================
+--==================================================
+-- OPEN GUI BUBBLE DRAG
+--==================================================
 
 local toggleDragging = false
-local toggleStart
-local togglePos
-local toggleTouch
+local toggleStart = nil
+local togglePos = nil
+local toggleTouch = nil
 
 Toggle.InputBegan:Connect(
     function(input)
 
         if
-            input.UserInputType
-                == Enum.UserInputType.MouseButton1
+            input.UserInputType ==
+                Enum.UserInputType.MouseButton1
             or
-            input.UserInputType
-                == Enum.UserInputType.Touch
+            input.UserInputType ==
+                Enum.UserInputType.Touch
         then
 
             toggleDragging = true
 
             toggleTouch =
-                input.UserInputType
-                    == Enum.UserInputType.Touch
+                input.UserInputType ==
+                    Enum.UserInputType.Touch
                 and input
                 or nil
 
@@ -1313,7 +1152,7 @@ Toggle.InputBegan:Connect(
     end
 )
 
-UserInputService.InputChanged:Connect(
+Services.UserInputService.InputChanged:Connect(
     function(input)
 
         if not toggleDragging then
@@ -1321,56 +1160,65 @@ UserInputService.InputChanged:Connect(
         end
 
         if
-            input.UserInputType
-                == Enum.UserInputType.Touch
-            and toggleTouch
-            and input ~= toggleTouch
+            input.UserInputType ==
+                Enum.UserInputType.Touch
+            and
+            toggleTouch
+            and
+            input ~= toggleTouch
         then
+
             return
+
         end
 
         if
-            input.UserInputType
-                ~= Enum.UserInputType.MouseMovement
+            input.UserInputType ~=
+                Enum.UserInputType.MouseMovement
             and
-            input.UserInputType
-                ~= Enum.UserInputType.Touch
+            input.UserInputType ~=
+                Enum.UserInputType.Touch
         then
+
             return
+
         end
 
         local delta =
-            input.Position
-            - toggleStart
+            input.Position -
+            toggleStart
 
         Toggle.Position =
             UDim2.new(
                 togglePos.X.Scale,
-                togglePos.X.Offset
-                    + delta.X,
+                togglePos.X.Offset +
+                    delta.X,
 
                 togglePos.Y.Scale,
-                togglePos.Y.Offset
-                    + delta.Y
+                togglePos.Y.Offset +
+                    delta.Y
             )
 
     end
 )
 
-UserInputService.InputEnded:Connect(
+Services.UserInputService.InputEnded:Connect(
     function(input)
 
         if
-            input.UserInputType
-                == Enum.UserInputType.MouseButton1
+            input.UserInputType ==
+                Enum.UserInputType.MouseButton1
             or
             (
                 toggleTouch
-                and input == toggleTouch
+                and
+                input == toggleTouch
             )
         then
 
             toggleDragging = false
+            toggleStart = nil
+            togglePos = nil
             toggleTouch = nil
 
         end
@@ -1378,6 +1226,84 @@ UserInputService.InputEnded:Connect(
     end
 )
 
+--==================================================
+-- OPEN / CLOSE GUI
+--==================================================
+
+local isUIVisible = true
+
+Toggle.MouseButton1Click:Connect(
+    function()
+
+        isUIVisible =
+            not isUIVisible
+
+        ScreenGui.Enabled =
+            isUIVisible
+
+        -- Press animation
+        Services.TweenService:Create(
+            Toggle,
+            TweenInfo.new(
+                0.12,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Size =
+                    UDim2.new(
+                        0,
+                        50,
+                        0,
+                        50
+                    )
+            }
+        ):Play()
+
+        task.wait(0.12)
+
+        Services.TweenService:Create(
+            Toggle,
+            TweenInfo.new(
+                0.12,
+                Enum.EasingStyle.Back,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Size =
+                    UDim2.new(
+                        0,
+                        58,
+                        0,
+                        58
+                    )
+            }
+        ):Play()
+
+    end
+)
+
+--==================================================
+-- PRELOAD LOGO
+--==================================================
+
+pcall(function()
+
+    Services.ContentProvider:PreloadAsync({
+        Logo,
+        HeaderLogo,
+    })
+
+end)
+
+--==================================================
+-- FINAL
+--==================================================
+
 print(
-    "XenonByte modern bubble UI loaded"
+    "XenonByte custom bubble UI loaded"
+)
+
+print(
+    "Open GUI Logo: rbxassetid://126314624782419"
 )
