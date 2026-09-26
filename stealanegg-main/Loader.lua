@@ -136,7 +136,7 @@ local function CreateLoadingScreen()
     Subtitle.Size = UDim2.new(1, -30, 0, 14)
     Subtitle.Position = UDim2.new(0, 15, 0, 36)
     Subtitle.BackgroundTransparency = 1
-    Subtitle.Text = "Steal An Egg • VIP Unlocked"
+    Subtitle.Text = "Steal An Egg • Free and Keyless"
     Subtitle.TextColor3 = Color3.fromRGB(145, 145, 175)
     Subtitle.TextSize = 9
     Subtitle.TextXAlignment = Enum.TextXAlignment.Center
