@@ -17,12 +17,6 @@ local AutoFarmEnabled = false
 local SelectedEgg = nil
 local EggList = {}
 
-local RarityPriority = {
-    Divine = 1,
-    Eternal = 2,
-    Secret = 3
-}
-
 --==================================================
 -- ASSETS
 --==================================================
@@ -70,7 +64,8 @@ local function GetPetData(AssetCategory)
         Name = AssetCategory,
         DisplayName = AssetCategory,
         EarningRate = 0,
-        Icon = nil
+        Icon = nil,
+        Rarity = nil
     }
     
     local Success, Module = pcall(function()
@@ -81,15 +76,10 @@ local function GetPetData(AssetCategory)
         Data.DisplayName = Module.DisplayName or AssetCategory
         Data.EarningRate = Module.EarningRate or 0
         Data.Icon = Module.Icon
-        Data.Rarity = nil
-
-        if type(Module.Rarity) == "string" then
+        if type(Module.Rarity) == "table" then
+            Data.Rarity = Module.Rarity._id or Module.Rarity.RarityId or Module.Rarity.Name
+        elseif type(Module.Rarity) == "string" then
             Data.Rarity = Module.Rarity
-        elseif type(Module.Rarity) == "table" then
-            Data.Rarity =
-                Module.Rarity._id
-                or Module.Rarity.RarityId
-                or Module.Rarity.Name
         end
     end
     
@@ -118,39 +108,15 @@ end
 -- CALCULATE REAL RATE
 --==================================================
 local function CalculateRatePerSecond(EarningRate, Scale, Mutations)
-    local PayoutFactor
-    if Scale <= 5 then
-        PayoutFactor = Scale ^ 1.85
-    else
-        PayoutFactor = (Scale / 5) ^ 1.2 * 19.637875755794113
-    end
-    
-    local MutationMultiplier = 1
-    if Mutations and #Mutations > 0 then
-        local Success, MutationsModule = pcall(function()
-            return require(ReplicatedStorage.Shared.Modules.Mutations)
-        end)
-        if Success and MutationsModule then
-            MutationMultiplier = MutationsModule.EarningsFor(Mutations)
-        end
-    end
-    
-    return math.round(EarningRate * PayoutFactor * MutationMultiplier)
+    -- The game's Config EarningRate is the authoritative displayed rate.
+    -- Do not invent a multiplier from client-side scale/mutation data.
+    return math.max(0, tonumber(EarningRate) or 0)
 end
 
 --==================================================
 -- FIND ASSET CATEGORY
 --==================================================
 local function FindAssetCategory(EggModel)
-    local AttributeCategory =
-        EggModel:GetAttribute("AssetCategory")
-        or EggModel:GetAttribute("Category")
-        or EggModel:GetAttribute("EggCategory")
-
-    if AttributeCategory and Configs:FindFirstChild(tostring(AttributeCategory)) then
-        return tostring(AttributeCategory)
-    end
-
     for _, descendant in ipairs(EggModel:GetDescendants()) do
         if descendant:IsA("MeshPart") and descendant.MeshId ~= "" then
             local Category = MeshIdToCategory[descendant.MeshId]
@@ -186,6 +152,7 @@ local function ScanEggs()
                         DisplayName = Data.DisplayName,
                         Icon = Data.Icon,
                         EarningRate = RealRate,
+                        Rarity = Data.Rarity,
                         Model = child
                     })
                 end
@@ -193,15 +160,12 @@ local function ScanEggs()
         end
     end
     
+    local RarityPriority = { Divine = 1, Eternal = 2, Secret = 3 }
     table.sort(EggList, function(a, b)
-        local ARarity = RarityPriority[a.Rarity] or 999
-        local BRarity = RarityPriority[b.Rarity] or 999
-
-        if ARarity ~= BRarity then
-            return ARarity < BRarity
-        end
-
-        return (a.EarningRate or 0) > (b.EarningRate or 0)
+        local ar = RarityPriority[a.Rarity] or 999
+        local br = RarityPriority[b.Rarity] or 999
+        if ar ~= br then return ar < br end
+        return a.EarningRate > b.EarningRate
     end)
     
     return EggList
@@ -225,15 +189,7 @@ end
 --==================================================
 local function SelectEgg(EggData)
     SelectedEgg = EggData
-    print(
-        "[XENONBYTE] Selected Egg: "
-        .. tostring(EggData.DisplayName)
-        .. " ["
-        .. tostring(EggData.Rarity or "Unknown")
-        .. "] ($"
-        .. FormatMoney(EggData.EarningRate)
-        .. "/s)"
-    )
+    print("[XENONBYTE] Selected Egg: " .. EggData.DisplayName .. " ($" .. FormatMoney(EggData.EarningRate) .. "/s)")
 end
 
 --==================================================
@@ -246,18 +202,9 @@ local function StartTeleport()
     end
 
     local Method = _G.XENONBYTE_SelectedMethod or "TeleportFly"
-    local Speed = tonumber(_G.XENONBYTE_TeleportSpeed) or 300
+    local Speed = _G.XENONBYTE_TeleportSpeed or 300
 
-    print(
-        "[XENONBYTE] Smooth Steal | Method: "
-        .. tostring(Method)
-        .. " | Speed: "
-        .. tostring(Speed)
-        .. " | Target: "
-        .. tostring(SelectedEgg.Id)
-        .. " | Rarity: "
-        .. tostring(SelectedEgg.Rarity or "Unknown")
-    )
+    print("[XENONBYTE] Start Teleport | Method: " .. Method .. " | Speed: " .. tostring(Speed) .. " | Target: " .. SelectedEgg.Id)
 
     if _G.XENONBYTE_TeleportSystem then
         _G.XENONBYTE_TeleportSystem.SetMethod(Method)
