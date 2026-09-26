@@ -3,30 +3,79 @@
 -- ==================================================
 
 _G.XENONBYTE = {
-    -- Hub Info
+
+    -- ==================================================
+    -- HUB INFO
+    -- ==================================================
+
     Name = "XenonByte | Steal An Egg",
-    Version = "Custom UI • VIP Unlocked",
+    Version = "XenonByte Hub",
     Author = "XenonByte",
+
+    -- VIP is unlocked
     VIPUnlocked = true,
 
-    -- Asset
+    -- ==================================================
+    -- ASSET
+    -- ==================================================
+
     AssetID = "rbxassetid://101352576986760",
 
-    -- UI
+    -- ==================================================
+    -- UI CONFIG
+    -- ==================================================
+
     UI = {
-        Width = 480,
-        Height = 340,
-        SidebarWidth = 115,
+
+        Width = 560,
+        Height = 390,
+
+        SidebarWidth = 142,
+
         TabHeight = 32,
+
         Theme = {
-            Background = Color3.fromRGB(8, 8, 8),
-            Sidebar = Color3.fromRGB(13, 13, 13),
-            TopBar = Color3.fromRGB(18, 18, 18),
-            Accent = Color3.fromRGB(235, 235, 235),
-            Text = Color3.fromRGB(255, 255, 255),
-            SubText = Color3.fromRGB(170, 170, 170),
+
+            Background = Color3.fromRGB(
+                8,
+                8,
+                8
+            ),
+
+            Sidebar = Color3.fromRGB(
+                13,
+                13,
+                13
+            ),
+
+            TopBar = Color3.fromRGB(
+                18,
+                18,
+                18
+            ),
+
+            Accent = Color3.fromRGB(
+                235,
+                235,
+                235
+            ),
+
+            Text = Color3.fromRGB(
+                255,
+                255,
+                255
+            ),
+
+            SubText = Color3.fromRGB(
+                170,
+                170,
+                170
+            )
+
         }
-    },
+
+    }
+
 }
 
-print("✅ Config Loaded")
+print("XenonByte Config Loaded")
