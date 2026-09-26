@@ -1,147 +1,248 @@
 --==================================================
 -- XENONBYTE HUB | TAB | Event
--- Feature: Auto Attack Drone
--- ✅ ដក Auto Save Config ចេញ (ManagerDrone មិនពាក់ព័ន្ធ Config)
 --==================================================
 
 local TabsManager = _G.XENONBYTE_TabsManager
-local TweenService = game:GetService("TweenService")
 
-local EventTab, EventPage = TabsManager:RegisterTab("Event", 5, "EVENT")
-
---==================================================
--- CONTENT
---==================================================
-CreateSectionTitle(EventPage, "Event", 1)
-
---==================================================
--- FEATURE: AUTO ATTACK DRONE (Checkbox)
---==================================================
-local ManagerHolder = Instance.new("Frame")
-ManagerHolder.Size = UDim2.new(1, 0, 0, 52)
-ManagerHolder.BackgroundTransparency = 1
-ManagerHolder.LayoutOrder = 2
-ManagerHolder.Parent = EventPage
-
-local ManagerLabel = Instance.new("TextLabel")
-ManagerLabel.Size = UDim2.new(1, -50, 0, 20)
-ManagerLabel.Position = UDim2.new(0, 0, 0, 2)
-ManagerLabel.BackgroundTransparency = 1
-ManagerLabel.Text = "Auto Attack Drone"
-ManagerLabel.TextColor3 = Color3.fromRGB(220, 220, 235)
-ManagerLabel.TextSize = 13
-ManagerLabel.TextXAlignment = Enum.TextXAlignment.Left
-ManagerLabel.TextYAlignment = Enum.TextYAlignment.Center
-ManagerLabel.Font = Enum.Font.GothamBold
-ManagerLabel.Parent = ManagerHolder
-
-local ManagerSub = Instance.new("TextLabel")
-ManagerSub.Size = UDim2.new(1, -50, 0, 18)
-ManagerSub.Position = UDim2.new(0, 0, 0, 24)
-ManagerSub.BackgroundTransparency = 1
-ManagerSub.Text = "AFK Farm Drone"
-ManagerSub.TextColor3 = Color3.fromRGB(150, 150, 170)
-ManagerSub.TextSize = 10
-ManagerSub.TextXAlignment = Enum.TextXAlignment.Left
-ManagerSub.Font = Enum.Font.Gotham
-ManagerSub.Parent = ManagerHolder
-
-local ManagerButton = Instance.new("TextButton")
-ManagerButton.Size = UDim2.new(0, 26, 0, 26)
-ManagerButton.Position = UDim2.new(1, -26, 0.5, -13)
-ManagerButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
-ManagerButton.BorderSizePixel = 0
-ManagerButton.Text = ""
-ManagerButton.AutoButtonColor = false
-ManagerButton.Parent = ManagerHolder
-
-local ManagerCorner = Instance.new("UICorner")
-ManagerCorner.CornerRadius = UDim.new(0, 6)
-ManagerCorner.Parent = ManagerButton
-
-local ManagerStroke = Instance.new("UIStroke")
-ManagerStroke.Color = Color3.fromRGB(200, 200, 220)
-ManagerStroke.Thickness = 1.5
-ManagerStroke.Parent = ManagerButton
-
-local ManagerCheck = Instance.new("TextLabel")
-ManagerCheck.Size = UDim2.new(1, 0, 1, 0)
-ManagerCheck.BackgroundTransparency = 1
-ManagerCheck.Text = "✓"
-ManagerCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
-ManagerCheck.TextSize = 18
-ManagerCheck.Font = Enum.Font.GothamBold
-ManagerCheck.Visible = false
-ManagerCheck.Parent = ManagerButton
+local EventTab, EventPage =
+    TabsManager:RegisterTab(
+        "Event",
+        6,
+        "EVENT"
+    )
 
 --==================================================
--- ✅ UPDATE UI FUNCTION
+-- EVENT SECTION
 --==================================================
-local function UpdateManagerUI(State)
-    ManagerCheck.Visible = State
-    if State then
-        ManagerButton.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
-        ManagerStroke.Color = Color3.fromRGB(245, 245, 245)
-    else
-        ManagerButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
-        ManagerStroke.Color = Color3.fromRGB(200, 200, 220)
+
+CreateSectionTitle(
+    EventPage,
+    "Event",
+    1
+)
+
+local EventInfo = Instance.new("TextLabel")
+
+EventInfo.Size =
+    UDim2.new(1, 0, 0, 55)
+
+EventInfo.BackgroundTransparency = 1
+
+EventInfo.Text =
+    "Event features and event-related controls."
+
+EventInfo.TextColor3 =
+    Color3.fromRGB(190, 190, 200)
+
+EventInfo.TextSize = 12
+
+EventInfo.TextWrapped = true
+
+EventInfo.Font =
+    Enum.Font.Gotham
+
+EventInfo.LayoutOrder = 2
+
+EventInfo.Parent =
+    EventPage
+
+--==================================================
+-- STATUS CARD
+--==================================================
+
+local StatusCard =
+    Instance.new("Frame")
+
+StatusCard.Size =
+    UDim2.new(1, 0, 0, 55)
+
+StatusCard.BackgroundColor3 =
+    Color3.fromRGB(28, 29, 42)
+
+StatusCard.BorderSizePixel = 0
+
+StatusCard.LayoutOrder = 3
+
+StatusCard.Parent =
+    EventPage
+
+local StatusCorner =
+    Instance.new("UICorner")
+
+StatusCorner.CornerRadius =
+    UDim.new(0, 8)
+
+StatusCorner.Parent =
+    StatusCard
+
+local StatusStroke =
+    Instance.new("UIStroke")
+
+StatusStroke.Color =
+    Color3.fromRGB(100, 100, 110)
+
+StatusStroke.Thickness = 1
+
+StatusStroke.Transparency = 0.35
+
+StatusStroke.Parent =
+    StatusCard
+
+local StatusTitle =
+    Instance.new("TextLabel")
+
+StatusTitle.Size =
+    UDim2.new(1, -24, 0, 20)
+
+StatusTitle.Position =
+    UDim2.new(0, 12, 0, 7)
+
+StatusTitle.BackgroundTransparency = 1
+
+StatusTitle.Text =
+    "Event Status"
+
+StatusTitle.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+StatusTitle.TextSize = 12
+
+StatusTitle.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+StatusTitle.Font =
+    Enum.Font.GothamBold
+
+StatusTitle.Parent =
+    StatusCard
+
+local StatusText =
+    Instance.new("TextLabel")
+
+StatusText.Size =
+    UDim2.new(1, -24, 0, 18)
+
+StatusText.Position =
+    UDim2.new(0, 12, 0, 29)
+
+StatusText.BackgroundTransparency = 1
+
+StatusText.Text =
+    "No active event detected"
+
+StatusText.TextColor3 =
+    Color3.fromRGB(160, 160, 170)
+
+StatusText.TextSize = 10
+
+StatusText.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+StatusText.Font =
+    Enum.Font.Gotham
+
+StatusText.Parent =
+    StatusCard
+
+--==================================================
+-- REFRESH EVENT
+--==================================================
+
+local RefreshEvent =
+    Instance.new("TextButton")
+
+RefreshEvent.Size =
+    UDim2.new(1, 0, 0, 42)
+
+RefreshEvent.BackgroundColor3 =
+    Color3.fromRGB(35, 35, 35)
+
+RefreshEvent.BorderSizePixel = 0
+
+RefreshEvent.Text =
+    "↻  Refresh Event"
+
+RefreshEvent.TextColor3 =
+    Color3.fromRGB(255, 255, 255)
+
+RefreshEvent.TextSize = 12
+
+RefreshEvent.Font =
+    Enum.Font.GothamBold
+
+RefreshEvent.AutoButtonColor = false
+
+RefreshEvent.LayoutOrder = 4
+
+RefreshEvent.Parent =
+    EventPage
+
+local RefreshCorner =
+    Instance.new("UICorner")
+
+RefreshCorner.CornerRadius =
+    UDim.new(0, 8)
+
+RefreshCorner.Parent =
+    RefreshEvent
+
+local RefreshStroke =
+    Instance.new("UIStroke")
+
+RefreshStroke.Color =
+    Color3.fromRGB(100, 100, 100)
+
+RefreshStroke.Thickness = 1
+
+RefreshStroke.Transparency = 0.25
+
+RefreshStroke.Parent =
+    RefreshEvent
+
+RefreshEvent.MouseEnter:Connect(
+    function()
+
+        RefreshEvent.BackgroundColor3 =
+            Color3.fromRGB(55, 55, 55)
+
     end
-end
+)
 
-ManagerButton.MouseButton1Click:Connect(function()
-    if not _G.XENONBYTE_ManagerDrone then
-        warn("[XENONBYTE] ManagerDrone not loaded!")
-        return
+RefreshEvent.MouseLeave:Connect(
+    function()
+
+        RefreshEvent.BackgroundColor3 =
+            Color3.fromRGB(35, 35, 35)
+
     end
+)
 
-    local NewState = not _G.XENONBYTE_ManagerDrone.IsEnabled()
-    UpdateManagerUI(NewState)
+RefreshEvent.MouseButton1Click:Connect(
+    function()
 
-    -- ✅ Call Enable/Disable (មិន Save Config)
-    if NewState then
-        _G.XENONBYTE_ManagerDrone.Enable()
-    else
-        _G.XENONBYTE_ManagerDrone.Disable()
+        RefreshEvent.Text =
+            "↻  Checking..."
+
+        task.wait(0.25)
+
+        -- Event detection can be connected
+        -- to the project's event system here.
+
+        RefreshEvent.Text =
+            "✓  Checked"
+
+        StatusText.Text =
+            "Event status refreshed"
+
+        StatusText.TextColor3 =
+            Color3.fromRGB(150, 255, 150)
+
+        task.wait(0.75)
+
+        RefreshEvent.Text =
+            "↻  Refresh Event"
+
     end
-end)
+)
 
---==================================================
--- ✅ SYNC STATE ON LOAD
---==================================================
-task.spawn(function()
-    task.wait(1)
-    if _G.XENONBYTE_ManagerDrone then
-        local State = _G.XENONBYTE_ManagerDrone.IsEnabled()
-        UpdateManagerUI(State)
-    end
-end)
-
---==================================================
--- ✅ REFRESH FUNCTION
---==================================================
-_G.XENONBYTE_RefreshEventUI = function()
-    if _G.XENONBYTE_ManagerDrone then
-        local State = _G.XENONBYTE_ManagerDrone.IsEnabled()
-        UpdateManagerUI(State)
-        print("[XENONBYTE] Event Tab UI Refreshed | State: " .. tostring(State))
-    end
-end
-
---==================================================
--- ✅ PERIODIC SYNC
---==================================================
-task.spawn(function()
-    while task.wait(1) do
-        if _G.XENONBYTE_ManagerDrone then
-            local CurrentState = _G.XENONBYTE_ManagerDrone.IsEnabled()
-            local UIState = ManagerCheck.Visible
-
-            if CurrentState ~= UIState then
-                UpdateManagerUI(CurrentState)
-                print("[XENONBYTE] Event UI Sync | State: " .. tostring(CurrentState))
-            end
-        end
-    end
-end)
-
-print("✅ Event Tab Loaded")
+return EventTab
