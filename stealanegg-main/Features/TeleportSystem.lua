@@ -546,12 +546,11 @@ local function FlyTP(Destination, Speed, UseShotTP, IsSafeZone, Callback)
                 task.spawn(function()
                     task.wait(0.1)
 
-                    CleanupMovers(true)  -- ✅ KeepPlatformStand = true
-                    Root2.CFrame = CFrame.new(Destination)
+                    CleanupMovers(true)  -- KeepPlatformStand = true
                     Root2.AssemblyLinearVelocity = Vector3.zero
                     Root2.AssemblyAngularVelocity = Vector3.zero
 
-                    task.wait(0.1)
+                    task.wait(0.05)
 
                     if Callback then Callback() end
                 end)
@@ -632,9 +631,24 @@ local function FlyTP(Destination, Speed, UseShotTP, IsSafeZone, Callback)
             return
         end
 
-        -- ✅ បន្តហោះ
+        -- Smooth movement:
+        -- accelerate normally when far away and brake near the
+        -- destination instead of maintaining one fixed velocity.
         if TotalDist > 1 then
-            BodyVelocity.Velocity = Direction.Unit * Speed
+            local BrakeDistance = IsSafeZone and 45 or 30
+            local SpeedMultiplier = math.clamp(
+                TotalDist / BrakeDistance,
+                0.22,
+                1
+            )
+
+            local SmoothSpeed = math.max(
+                25,
+                Speed * SpeedMultiplier
+            )
+
+            BodyVelocity.Velocity =
+                Direction.Unit * SmoothSpeed
         else
             BodyVelocity.Velocity = Vector3.zero
         end
@@ -685,8 +699,8 @@ local function TeleportToTarget(TargetPos, Callback)
         print("[XENONBYTE] Instant TP to Target")
         InstantFlyTP(TargetPos, Callback)
     else
-        print("[XENONBYTE] FlyTP to Target (Shot TP 25)")
-        FlyTP(TargetPos, FLY_SPEED, true, false, Callback)
+        print("[XENONBYTE] Smooth FlyTP to Target")
+        FlyTP(TargetPos, FLY_SPEED, false, false, Callback)
     end
 end
 
@@ -784,7 +798,8 @@ AutoStop = function()
     local Hum, Root = GetHumanoid()
     if Root then
         pcall(function()
-            Root.CFrame = CFrame.new(SAFE_ZONE)
+            -- The smooth safe-zone flight already placed the character
+            -- at SAFE_ZONE. Do not hard-snap again here.
             Root.AssemblyLinearVelocity = Vector3.zero
             Root.AssemblyAngularVelocity = Vector3.zero
         end)
@@ -963,31 +978,23 @@ end
 -- ✅ FLY TO SAFE ZONE (មិន Shot TP + Stop + Reset ភ្លាមៗ)
 -- ==================================================
 FlyToSafeZone = function()
+    if not Running then return end
+
     CurrentStep = "to_safe"
-
-    -- ✅ Reset RecoveryTriggered មុនពេល FlyTP
     RecoveryTriggered = false
-    TargetCollected = false
 
-    print("[XENONBYTE] FlyTP to Safe Zone (No Shot TP)")
+    print("[XENONBYTE] Smooth FlyTP to Safe Zone")
 
     FlyTP(SAFE_ZONE, RETURN_SPEED, false, true, function()
+        if not Running then return end
+
         print("[XENONBYTE] ✅ Arrived Safe Zone → AutoStop")
 
-        TargetCollected = false
-        CollectDone = false
-        CollectTime = 0
-        CollectAttempts = 0
+        TargetCollected = true
         RecoveryTriggered = false
-        RemotesFired = false
-        FlyTargetStarted = false
-        RecoveryAttempts = 0
-        SavedTargetPosition = nil
 
-        task.spawn(function()
-            task.wait(0.2)
-            AutoStop()
-        end)
+        -- Stop exactly once after the smooth return finishes.
+        AutoStop()
     end)
 end
 
@@ -1115,21 +1122,13 @@ StartActiveHeartbeat = function()
             end
         end
 
-        -- Step 4: Recovery (Egg Drop តាមផ្លូវ)
+        -- Step 4: Returning to Safe Zone
+        -- Never trigger target recovery while travelling home.
+        -- DropHeldEgg can change during the return transition;
+        -- treating that change as a dropped egg caused the old
+        -- safe-zone teleport/recovery loop.
         if CurrentStep == "to_safe" then
-            if not IsTargetCollectedByDropHeldEgg() then
-                if not RecoveryTriggered then
-                    RecoveryTriggered = true
-                    print("[XENONBYTE] ⚠️ Egg Dropped on Way → Recovery!")
-                    task.spawn(function()
-                        task.wait(0.1)
-                        FlyToTargetAgain()
-                    end)
-                end
-                return
-            else
-                RecoveryTriggered = false
-            end
+            return
         end
     end)
 end
