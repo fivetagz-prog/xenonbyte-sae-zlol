@@ -118,6 +118,10 @@ local FirstEggSlotKey = nil
 local CollectAttempts = 0
 local CollectTime = 0
 local TargetCollectStartTime = 0
+local TargetCollectAttempts = 0
+local TargetInitialLocation = "none"
+local TargetDropStateAtStart = false
+local TargetRemoteFired = false
 
 local FlyTargetStarted = false
 local CollectDone = false
@@ -546,11 +550,12 @@ local function FlyTP(Destination, Speed, UseShotTP, IsSafeZone, Callback)
                 task.spawn(function()
                     task.wait(0.1)
 
-                    CleanupMovers(true)  -- KeepPlatformStand = true
+                    CleanupMovers(true)  -- ✅ KeepPlatformStand = true
+                    Root2.CFrame = CFrame.new(Destination)
                     Root2.AssemblyLinearVelocity = Vector3.zero
                     Root2.AssemblyAngularVelocity = Vector3.zero
 
-                    task.wait(0.05)
+                    task.wait(0.1)
 
                     if Callback then Callback() end
                 end)
@@ -631,24 +636,9 @@ local function FlyTP(Destination, Speed, UseShotTP, IsSafeZone, Callback)
             return
         end
 
-        -- Smooth movement:
-        -- accelerate normally when far away and brake near the
-        -- destination instead of maintaining one fixed velocity.
+        -- ✅ បន្តហោះ
         if TotalDist > 1 then
-            local BrakeDistance = IsSafeZone and 45 or 30
-            local SpeedMultiplier = math.clamp(
-                TotalDist / BrakeDistance,
-                0.22,
-                1
-            )
-
-            local SmoothSpeed = math.max(
-                25,
-                Speed * SpeedMultiplier
-            )
-
-            BodyVelocity.Velocity =
-                Direction.Unit * SmoothSpeed
+            BodyVelocity.Velocity = Direction.Unit * Speed
         else
             BodyVelocity.Velocity = Vector3.zero
         end
@@ -699,8 +689,8 @@ local function TeleportToTarget(TargetPos, Callback)
         print("[XENONBYTE] Instant TP to Target")
         InstantFlyTP(TargetPos, Callback)
     else
-        print("[XENONBYTE] Smooth FlyTP to Target")
-        FlyTP(TargetPos, FLY_SPEED, false, false, Callback)
+        print("[XENONBYTE] FlyTP to Target (Shot TP 25)")
+        FlyTP(TargetPos, FLY_SPEED, true, false, Callback)
     end
 end
 
@@ -720,12 +710,13 @@ end
 
 local function RemoteCollectTarget()
     if not CollectEvent or not TARGET_UID then return false end
-    local success = pcall(function()
+    local success, result = pcall(function()
         return CollectEvent:InvokeServer({
             Uid = TARGET_UID
         })
     end)
-    return success
+    TargetRemoteFired = true
+    return success, result
 end
 
 -- ==================================================
@@ -798,8 +789,7 @@ AutoStop = function()
     local Hum, Root = GetHumanoid()
     if Root then
         pcall(function()
-            -- The smooth safe-zone flight already placed the character
-            -- at SAFE_ZONE. Do not hard-snap again here.
+            Root.CFrame = CFrame.new(SAFE_ZONE)
             Root.AssemblyLinearVelocity = Vector3.zero
             Root.AssemblyAngularVelocity = Vector3.zero
         end)
@@ -825,6 +815,10 @@ AutoStop = function()
     CollectAttempts = 0
     CollectTime = 0
     TargetCollectStartTime = 0
+    TargetCollectAttempts = 0
+    TargetInitialLocation = "none"
+    TargetDropStateAtStart = false
+    TargetRemoteFired = false
     FlyTargetStarted = false
     CollectDone = false
     TargetCollected = false
@@ -845,22 +839,20 @@ StartFlyToTarget = function()
 
     CurrentStep = "to_target"
 
+    -- Resolve the special egg again AFTER the chicken egg is collected.
+    -- The target can move from AreaEggSlotsClient into Workspace during
+    -- the carry/steal transition, so an old position/mode is unreliable.
     local TargetPos = nil
-
-    if CurrentMode == "spawn" then
-        local TargetEgg = Container and Container:FindFirstChild(TARGET_UID)
-        if TargetEgg then
-            TargetPos = GetPosition(TargetEgg)
-        end
-    elseif CurrentMode == "workspace" then
-        if SavedTargetPosition then
-            TargetPos = SavedTargetPosition
-        else
-            local WSEgg = workspace:FindFirstChild(TARGET_UID)
-            if WSEgg then
-                TargetPos = GetPosition(WSEgg)
-                SavedTargetPosition = TargetPos
-            end
+    local TargetEgg = Container and Container:FindFirstChild(TARGET_UID)
+    if TargetEgg then
+        CurrentMode = "spawn"
+        TargetPos = GetPosition(TargetEgg)
+    else
+        local WSEgg = workspace:FindFirstChild(TARGET_UID)
+        if WSEgg then
+            CurrentMode = "workspace"
+            TargetPos = GetPosition(WSEgg)
+            SavedTargetPosition = TargetPos
         end
     end
 
@@ -873,8 +865,12 @@ StartFlyToTarget = function()
         TargetCollected = false
         CollectTime = 0
         CollectAttempts = 0
+        TargetCollectAttempts = 0
+        TargetRemoteFired = false
         RecoveryTriggered = false
         TargetCollectStartTime = tick()
+        TargetInitialLocation = CurrentMode
+        TargetDropStateAtStart = DropHeldEgg and DropHeldEgg.Enabled == true or false
         CurrentStep = "collect_target"
     end)
 end
@@ -978,23 +974,30 @@ end
 -- ✅ FLY TO SAFE ZONE (មិន Shot TP + Stop + Reset ភ្លាមៗ)
 -- ==================================================
 FlyToSafeZone = function()
-    if not Running then return end
-
     CurrentStep = "to_safe"
+
+    -- ✅ Reset RecoveryTriggered មុនពេល FlyTP
     RecoveryTriggered = false
 
-    print("[XENONBYTE] Smooth FlyTP to Safe Zone")
+    print("[XENONBYTE] FlyTP to Safe Zone (No Shot TP)")
 
     FlyTP(SAFE_ZONE, RETURN_SPEED, false, true, function()
-        if not Running then return end
-
         print("[XENONBYTE] ✅ Arrived Safe Zone → AutoStop")
 
-        TargetCollected = true
+        TargetCollected = false
+        CollectDone = false
+        CollectTime = 0
+        CollectAttempts = 0
         RecoveryTriggered = false
+        RemotesFired = false
+        FlyTargetStarted = false
+        RecoveryAttempts = 0
+        SavedTargetPosition = nil
 
-        -- Stop exactly once after the smooth return finishes.
-        AutoStop()
+        task.spawn(function()
+            task.wait(0.2)
+            AutoStop()
+        end)
     end)
 end
 
@@ -1062,55 +1065,58 @@ StartActiveHeartbeat = function()
         -- Step 3: Collect Target Egg
         if CurrentStep == "collect_target" and not TargetCollected then
 
-            if IsTargetCollectedByDropHeldEgg() then
-                print("[XENONBYTE] ✅ DropHeldEgg.Enabled = true → Target Collected!")
-                TargetCollected = true
-                RecoveryTriggered = false
-                task.spawn(function()
-                    task.wait(0.1)
-                    FlyToSafeZone()
-                end)
-                return
-            end
-
-            if CurrentMode == "spawn" then
-                if workspace:FindFirstChild(TARGET_UID) then
-                    TargetCollected = true
-                    RecoveryTriggered = false
-                    task.spawn(function()
-                        task.wait(0.1)
-                        FlyToSafeZone()
-                    end)
-                    return
-                end
-            elseif CurrentMode == "workspace" then
-                if SavedTargetPosition then                    local WSEgg = workspace:FindFirstChild(TARGET_UID)
-                    if WSEgg then
-                        local CurrentPos = GetPosition(WSEgg)
-                        if CurrentPos then
-                            local Dist = (CurrentPos - SavedTargetPosition).Magnitude
-                            if Dist >= POSITION_THRESHOLD then
-                                TargetCollected = true
-                                RecoveryTriggered = false
-                                task.spawn(function()
-                                    task.wait(0.1)
-                                    FlyToSafeZone()
-                                end)
-                                return
-                            end
-                        end
-                    end
-                end
-            end
+            -- Never treat the chicken egg's existing carry state as the
+            -- special egg being stolen. The target must receive at least
+            -- one real collect request first.
+            local elapsed = tick() - TargetCollectStartTime
 
             if tick() - CollectTime > COLLECT_INTERVAL then
                 CollectTime = tick()
-                RemoteCollectTarget()
-                CollectAttempts = CollectAttempts + 1
+
+                local RemoteOK = RemoteCollectTarget()
+                TargetCollectAttempts = TargetCollectAttempts + 1
+                CollectAttempts = TargetCollectAttempts
+
+                -- Server/client state may update a frame after InvokeServer.
+                -- Give it a short window before checking the target object.
+                task.spawn(function()
+                    task.wait(0.08)
+                    if not Running or CurrentStep ~= "collect_target" or TargetCollected then return end
+
+                    local StillInContainer = IsTargetInContainer()
+                    local StillInWorkspace = IsTargetInWorkspace()
+                    local DropNow = IsTargetCollectedByDropHeldEgg()
+
+                    local DroppedTransition =
+                        (not TargetDropStateAtStart) and DropNow
+
+                    local TargetMovedAfterRemote =
+                        TargetRemoteFired and
+                        TargetInitialLocation == "spawn" and
+                        (not StillInContainer) and
+                        StillInWorkspace
+
+                    local TargetRemoved =
+                        TargetRemoteFired and
+                        (not StillInContainer) and
+                        (not StillInWorkspace)
+
+                    if DroppedTransition or TargetMovedAfterRemote or TargetRemoved then
+                        TargetCollected = true
+                        RecoveryTriggered = false
+                        print("[XENONBYTE] ✅ Special egg collect confirmed | attempts=" .. tostring(TargetCollectAttempts))
+                        task.spawn(function()
+                            task.wait(0.12)
+                            if Running and CurrentStep == "collect_target" then
+                                FlyToSafeZone()
+                            end
+                        end)
+                    end
+                end)
             end
 
-            if tick() - TargetCollectStartTime > TARGET_COLLECT_TIMEOUT then
-                print("[XENONBYTE] ⚠️ Target Collect Timeout → Recovery")
+            if elapsed > TARGET_COLLECT_TIMEOUT then
+                print("[XENONBYTE] ⚠️ Special egg collect timeout → Recovery")
                 if not RecoveryTriggered then
                     RecoveryTriggered = true
                     task.spawn(function()
@@ -1122,11 +1128,9 @@ StartActiveHeartbeat = function()
             end
         end
 
-        -- Step 4: Returning to Safe Zone
-        -- Never trigger target recovery while travelling home.
-        -- DropHeldEgg can change during the return transition;
-        -- treating that change as a dropped egg caused the old
-        -- safe-zone teleport/recovery loop.
+        -- Step 4: Return to safe zone.
+        -- Do NOT run target recovery here. DropHeldEgg belongs to the
+        -- carried chicken/special-egg UI state and can change during return.
         if CurrentStep == "to_safe" then
             return
         end
@@ -1146,6 +1150,10 @@ StartProcess = function()
     CollectAttempts = 0
     CollectTime = 0
     TargetCollectStartTime = 0
+    TargetCollectAttempts = 0
+    TargetInitialLocation = "none"
+    TargetDropStateAtStart = false
+    TargetRemoteFired = false
     FlyTargetStarted = false
     CollectDone = false
     TargetCollected = false
@@ -1241,6 +1249,10 @@ local function FullReset()
     CollectAttempts = 0
     CollectTime = 0
     TargetCollectStartTime = 0
+    TargetCollectAttempts = 0
+    TargetInitialLocation = "none"
+    TargetDropStateAtStart = false
+    TargetRemoteFired = false
     FlyTargetStarted = false
     CollectDone = false
     TargetCollected = false
