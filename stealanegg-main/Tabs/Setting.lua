@@ -219,16 +219,7 @@ SpeedStroke.Thickness = 1
 SpeedStroke.Transparency = 0.3
 SpeedStroke.Parent = SpeedTextBox
 
--- ✅ Flag: User កំពុង Edit
-local IsEditingSpeed = false
-
-SpeedTextBox.Focused:Connect(function()
-    IsEditingSpeed = true
-end)
-
 SpeedTextBox.FocusLost:Connect(function()
-    IsEditingSpeed = false
-
     local Value = tonumber(SpeedTextBox.Text)
 
     if Value then
@@ -244,25 +235,10 @@ SpeedTextBox.FocusLost:Connect(function()
         if _G.XENONBYTE_ConfigSystem then
             _G.XENONBYTE_ConfigSystem.Save()
         end
-
-        print("[XENONBYTE] Teleport Speed: " .. tostring(Value))
     else
-        SpeedTextBox.Text = "300"
-        _G.XENONBYTE_TeleportSpeed = 300
-
-        if _G.XENONBYTE_TeleportSystem then
-            _G.XENONBYTE_TeleportSystem.SetSpeed(300)
-        end
-
-        if _G.XENONBYTE_ConfigSystem then
-            _G.XENONBYTE_ConfigSystem.Save()
-        end
+        SpeedTextBox.Text = tostring(_G.XENONBYTE_TeleportSpeed or 300)
     end
 end)
-
-if _G.XENONBYTE_TeleportSpeed == nil then
-    _G.XENONBYTE_TeleportSpeed = 300
-end
 
 --==================================================
 -- FEATURE 3: WALK SPEED
@@ -341,9 +317,11 @@ local WalkSpeedValue = 50
 local function ToggleWalkSpeed()
     WalkSpeedEnabled = not WalkSpeedEnabled
     WalkSpeedCheck.Visible = WalkSpeedEnabled
+
     if WalkSpeedEnabled then
         WalkSpeedCheckButton.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
         WalkSpeedStroke.Color = Color3.fromRGB(245, 245, 245)
+
         if _G.XENONBYTE_WalkSpeed then
             _G.XENONBYTE_WalkSpeed.SetValue(WalkSpeedValue)
             _G.XENONBYTE_WalkSpeed.Enable()
@@ -351,6 +329,7 @@ local function ToggleWalkSpeed()
     else
         WalkSpeedCheckButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
         WalkSpeedStroke.Color = Color3.fromRGB(200, 200, 220)
+
         if _G.XENONBYTE_WalkSpeed then
             _G.XENONBYTE_WalkSpeed.Disable()
         end
@@ -363,9 +342,11 @@ end)
 
 WalkSpeedTextBox.FocusLost:Connect(function()
     local val = tonumber(WalkSpeedTextBox.Text)
+
     if val then
         WalkSpeedValue = math.clamp(val, 50, 1000)
         WalkSpeedTextBox.Text = tostring(WalkSpeedValue)
+
         if WalkSpeedEnabled and _G.XENONBYTE_WalkSpeed then
             _G.XENONBYTE_WalkSpeed.SetValue(WalkSpeedValue)
         end
@@ -439,15 +420,18 @@ local AntiTrapEnabled = false
 local function ToggleAntiTrap()
     AntiTrapEnabled = not AntiTrapEnabled
     AntiTrapCheck.Visible = AntiTrapEnabled
+
     if AntiTrapEnabled then
         AntiTrapCheckButton.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
         AntiTrapStroke.Color = Color3.fromRGB(245, 245, 245)
+
         if _G.XENONBYTE_AntiTrap then
             _G.XENONBYTE_AntiTrap.Enable()
         end
     else
         AntiTrapCheckButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
         AntiTrapStroke.Color = Color3.fromRGB(200, 200, 220)
+
         if _G.XENONBYTE_AntiTrap then
             _G.XENONBYTE_AntiTrap.Disable()
         end
@@ -576,9 +560,11 @@ local function ShowNotification(Text)
         Position = UDim2.new(0, -250, 0, 20),
         BackgroundTransparency = 1
     }):Play()
+
     TweenService:Create(NotifyText, TweenInfo.new(0.3), {
         TextTransparency = 1
     }):Play()
+
     TweenService:Create(NotifyStroke, TweenInfo.new(0.3), {
         Transparency = 1
     }):Play()
@@ -605,6 +591,7 @@ GodModeButton.MouseButton1Click:Connect(function()
     if _G.XENONBYTE_GodMode then
         _G.XENONBYTE_GodMode.Enable()
     end
+
     ShowNotification("God Mode Start")
 end)
 
@@ -706,6 +693,7 @@ end)
 
 task.spawn(function()
     task.wait(0.5)
+
     if _G.XENONBYTE_ManualFastClick then
         if _G.XENONBYTE_ManualFastClick.IsEnabled() then
             FastClickButton.Text = "Stop"
@@ -780,15 +768,18 @@ local AntiAFKEnabled = false
 local function ToggleAntiAFK()
     AntiAFKEnabled = not AntiAFKEnabled
     AntiAFKCheck.Visible = AntiAFKEnabled
+
     if AntiAFKEnabled then
         AntiAFKCheckButton.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
         AntiAFKStroke.Color = Color3.fromRGB(245, 245, 245)
+
         if _G.XENONBYTE_AntiAFK then
             _G.XENONBYTE_AntiAFK.Enable()
         end
     else
         AntiAFKCheckButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
         AntiAFKStroke.Color = Color3.fromRGB(200, 200, 220)
+
         if _G.XENONBYTE_AntiAFK then
             _G.XENONBYTE_AntiAFK.Disable()
         end
@@ -800,23 +791,20 @@ AntiAFKCheckButton.MouseButton1Click:Connect(function()
 end)
 
 --==================================================
--- ✅ SYNC ON LOAD (Only Once - After Setting Load)
+-- SYNC ON LOAD
 --==================================================
 task.spawn(function()
     task.wait(0.5)
 
-    -- ✅ Sync Dropdown
     if _G.XENONBYTE_SelectedMethod then
         SelectedMethod = _G.XENONBYTE_SelectedMethod
         DropdownBtn.Text = SelectedMethod .. " ▼"
     end
 
-    -- ✅ Sync Speed
     if _G.XENONBYTE_TeleportSpeed then
         SpeedTextBox.Text = tostring(_G.XENONBYTE_TeleportSpeed)
     end
 
-    -- ✅ Sync Anti AFK
     if _G.XENONBYTE_AntiAFK then
         if _G.XENONBYTE_AntiAFK.IsEnabled() then
             AntiAFKEnabled = true
