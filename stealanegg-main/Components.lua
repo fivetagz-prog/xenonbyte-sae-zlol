@@ -1,1772 +1,447 @@
 -- ==================================================
--- XENONBYTE HUB | COMPONENTS
+-- XENONBYTE HUB | NEW PROJECT | Components
 -- ==================================================
 
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-
-local Settings = _G.XENONBYTE
-local Theme = Settings.UI.Theme
-
-local Components = {}
 
 -- ==================================================
--- HELPERS
+-- GET TAB TEXT SIZE
 -- ==================================================
-
-local function Corner(parent, radius)
-
-    local c = Instance.new("UICorner")
-
-    c.CornerRadius =
-        UDim.new(0, radius or 8)
-
-    c.Parent = parent
-
-    return c
-
-end
-
-local function Stroke(parent, color, thickness, transparency)
-
-    local s = Instance.new("UIStroke")
-
-    s.Color =
-        color or Color3.fromRGB(70, 70, 70)
-
-    s.Thickness =
-        thickness or 1
-
-    s.Transparency =
-        transparency or 0
-
-    s.Parent = parent
-
-    return s
-
-end
-
-local function Gradient(parent, color1, color2, rotation)
-
-    local g = Instance.new("UIGradient")
-
-    g.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, color1),
-        ColorSequenceKeypoint.new(1, color2)
-    })
-
-    g.Rotation =
-        rotation or 90
-
-    g.Parent = parent
-
-    return g
-
-end
-
-local function Tween(object, properties, duration)
-
-    local tween =
-        TweenService:Create(
-            object,
-
-            TweenInfo.new(
-                duration or 0.15,
-                Enum.EasingStyle.Quad,
-                Enum.EasingDirection.Out
-            ),
-
-            properties
-        )
-
-    tween:Play()
-
-    return tween
-
+local function GetTabTextSize(Name)
+    local Length = #Name
+    if Length >= 16 then return 10
+    elseif Length >= 13 then return 11
+    elseif Length >= 9 then return 12
+    elseif Length >= 6 then return 13
+    else return 14 end
 end
 
 -- ==================================================
--- SECTION
+-- CREATE TAB
 -- ==================================================
+function CreateTab(Name, Order)
+    local TabScroll = _G.XENONBYTE_TabScroll
+    local Tab = Instance.new("TextButton")
+    Tab.Name = Name:gsub("%s+", "_") .. "_Tab"
+    Tab.Size = UDim2.new(1, 0, 0, 32)
+    Tab.BackgroundColor3 = Color3.fromRGB(38, 40, 52)
+    Tab.BackgroundTransparency = 1
+    Tab.BorderSizePixel = 0
+    Tab.Text = ""
+    Tab.AutoButtonColor = false
+    Tab.LayoutOrder = Order or 1
+    Tab.ZIndex = 7
+    Tab.Parent = TabScroll
 
-function Components.Section(parent, title)
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = Tab
 
-    local Section =
-        Instance.new("Frame")
+    local TabBorder = Instance.new("UIStroke")
+    TabBorder.Color = Color3.fromRGB(200, 200, 220)
+    TabBorder.Thickness = 1
+    TabBorder.Transparency = 0.2
+    TabBorder.Parent = Tab
 
-    Section.Name =
-        title or "Section"
+    local Indicator = Instance.new("Frame")
+    Indicator.Name = "Indicator"
+    Indicator.Size = UDim2.new(0, 3, 0, 18)
+    Indicator.Position = UDim2.new(0, 2, 0.5, -9)
+    Indicator.BackgroundColor3 = Color3.fromRGB(200, 200, 220)
+    Indicator.BackgroundTransparency = 1
+    Indicator.BorderSizePixel = 0
+    Indicator.ZIndex = 8
+    Indicator.Parent = Tab
 
-    Section.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            42
-        )
+    local IndicatorCorner = Instance.new("UICorner")
+    IndicatorCorner.CornerRadius = UDim.new(1, 0)
+    IndicatorCorner.Parent = Indicator
 
-    Section.BackgroundColor3 =
-        Color3.fromRGB(
-            16,
-            16,
-            16
-        )
+    local Text = Instance.new("TextLabel")
+    Text.Name = "TabText"
+    Text.Size = UDim2.new(1, -10, 1, 0)
+    Text.Position = UDim2.new(0, 8, 0, 0)
+    Text.BackgroundTransparency = 1
+    Text.Text = Name
+    Text.TextColor3 = Color3.fromRGB(155, 155, 175)
+    Text.TextSize = GetTabTextSize(Name)
+    Text.TextXAlignment = Enum.TextXAlignment.Left
+    Text.TextYAlignment = Enum.TextYAlignment.Center
+    Text.Font = Enum.Font.GothamMedium
+    Text.TextTruncate = Enum.TextTruncate.AtEnd
+    Text.Active = false
+    Text.Selectable = false
+    Text.ZIndex = 8
+    Text.Parent = Tab
 
-    Section.BorderSizePixel =
-        0
-
-    Section.Parent =
-        parent
-
-    Corner(
-        Section,
-        10
-    )
-
-    Stroke(
-        Section,
-        Color3.fromRGB(
-            65,
-            65,
-            65
-        ),
-        1,
-        0.4
-    )
-
-    Gradient(
-        Section,
-        Color3.fromRGB(
-            25,
-            25,
-            25
-        ),
-        Color3.fromRGB(
-            12,
-            12,
-            12
-        ),
-        90
-    )
-
-    local Label =
-        Instance.new("TextLabel")
-
-    Label.Size =
-        UDim2.new(
-            1,
-            -20,
-            1,
-            0
-        )
-
-    Label.Position =
-        UDim2.fromOffset(
-            10,
-            0
-        )
-
-    Label.BackgroundTransparency =
-        1
-
-    Label.Text =
-        tostring(title or "SECTION")
-
-    Label.TextColor3 =
-        Theme.Text
-
-    Label.TextSize =
-        11
-
-    Label.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Label.Font =
-        Enum.Font.GothamBold
-
-    Label.Parent =
-        Section
-
-    return Section
-
+    return Tab
 end
 
 -- ==================================================
--- LABEL
+-- CREATE PAGE
 -- ==================================================
+function CreatePage(Name)
+    local Content = _G.XENONBYTE_Content
+    local Page = Instance.new("ScrollingFrame")
+    Page.Name = Name .. "_Page"
+    Page.Size = UDim2.new(1, 0, 1, 0)
+    Page.BackgroundTransparency = 1
+    Page.BorderSizePixel = 0
+    Page.Visible = false
+    Page.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Page.ScrollingDirection = Enum.ScrollingDirection.Y
+    Page.ScrollBarThickness = 4
+    Page.ScrollBarImageColor3 = Color3.fromRGB(200, 200, 220)
+    Page.ScrollBarImageTransparency = 0.1
+    Page.VerticalScrollBarInset = Enum.ScrollBarInset.Always
+    Page.HorizontalScrollBarInset = Enum.ScrollBarInset.None
+    Page.Active = true
+    Page.Selectable = true
+    Page.ZIndex = 6
+    Page.Parent = Content
 
-function Components.Label(parent, text)
+    local Padding = Instance.new("UIPadding")
+    Padding.PaddingTop = UDim.new(0, 12)
+    Padding.PaddingBottom = UDim.new(0, 14)
+    Padding.PaddingLeft = UDim.new(0, 14)
+    Padding.PaddingRight = UDim.new(0, 12)
+    Padding.Parent = Page
 
-    local Label =
-        Instance.new("TextLabel")
+    local List = Instance.new("UIListLayout")
+    List.Padding = UDim.new(0, 4)
+    List.SortOrder = Enum.SortOrder.LayoutOrder
+    List.Parent = Page
 
-    Label.Size =
-        UDim2.new(
-            1,
-            -4,
-            0,
-            28
-        )
+    return Page
+end
 
-    Label.BackgroundTransparency =
-        1
-
-    Label.Text =
-        tostring(text or "")
-
-    Label.TextColor3 =
-        Theme.SubText
-
-    Label.TextSize =
-        10
-
-    Label.TextWrapped =
-        true
-
-    Label.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Label.Font =
-        Enum.Font.GothamMedium
-
-    Label.Parent =
-        parent
-
+-- ==================================================
+-- CREATE SECTION TITLE
+-- ==================================================
+function CreateSectionTitle(Parent, TextValue, Order)
+    local Label = Instance.new("TextLabel")
+    Label.Name = "SectionTitle"
+    Label.Size = UDim2.new(1, 0, 0, 23)
+    Label.BackgroundTransparency = 1
+    Label.Text = TextValue
+    Label.TextColor3 = Color3.fromRGB(235, 235, 245)
+    Label.TextSize = 13
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextYAlignment = Enum.TextYAlignment.Center
+    Label.Font = Enum.Font.GothamBold
+    Label.LayoutOrder = Order or 1
+    Label.Active = false
+    Label.Selectable = false
+    Label.ZIndex = 8
+    Label.Parent = Parent
     return Label
-
 end
 
 -- ==================================================
--- BUTTON
+-- CREATE CHECKBOX
 -- ==================================================
-
-function Components.Button(
-    parent,
-    text,
-    callback
-)
-
-    local Button =
-        Instance.new("TextButton")
-
-    Button.Name =
-        tostring(text or "Button")
-
-    Button.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            36
-        )
-
-    Button.BackgroundColor3 =
-        Color3.fromRGB(
-            24,
-            24,
-            24
-        )
-
-    Button.BorderSizePixel =
-        0
-
-    Button.AutoButtonColor =
-        false
-
-    Button.Text =
-        tostring(text or "Button")
-
-    Button.TextColor3 =
-        Theme.Text
-
-    Button.TextSize =
-        10
-
-    Button.Font =
-        Enum.Font.GothamBold
-
-    Button.Parent =
-        parent
-
-    Corner(
-        Button,
-        9
-    )
-
-    local border =
-        Stroke(
-            Button,
-            Color3.fromRGB(
-                65,
-                65,
-                65
-            ),
-            1,
-            0.35
-        )
-
-    Gradient(
-        Button,
-        Color3.fromRGB(
-            34,
-            34,
-            34
-        ),
-        Color3.fromRGB(
-            14,
-            14,
-            14
-        ),
-        90
-    )
-
-    Button.MouseEnter:Connect(
-        function()
-
-            Tween(
-                Button,
-                {
-                    BackgroundColor3 =
-                        Color3.fromRGB(
-                            48,
-                            48,
-                            48
-                        )
-                }
-            )
-
-            Tween(
-                border,
-                {
-                    Transparency = 0
-                }
-            )
-
-        end
-    )
-
-    Button.MouseLeave:Connect(
-        function()
-
-            Tween(
-                Button,
-                {
-                    BackgroundColor3 =
-                        Color3.fromRGB(
-                            24,
-                            24,
-                            24
-                        )
-                }
-            )
-
-            Tween(
-                border,
-                {
-                    Transparency = 0.35
-                }
-            )
-
-        end
-    )
-
-    Button.MouseButton1Down:Connect(
-        function()
-
-            Tween(
-                Button,
-                {
-                    Size =
-                        UDim2.new(
-                            1,
-                            -2,
-                            0,
-                            34
-                        )
-                },
-                0.08
-            )
-
-        end
-    )
-
-    Button.MouseButton1Up:Connect(
-        function()
-
-            Tween(
-                Button,
-                {
-                    Size =
-                        UDim2.new(
-                            1,
-                            0,
-                            0,
-                            36
-                        )
-                },
-                0.08
-            )
-
-        end
-    )
-
-    if callback then
-
-        Button.MouseButton1Click:Connect(
-            function()
-
-                task.spawn(
-                    function()
-
-                        local success, err =
-                            pcall(callback)
-
-                        if not success then
-                            warn(
-                                "[XenonByte] Button error:",
-                                err
-                            )
-                        end
-
-                    end
-                )
-
-            end
-        )
-
-    end
-
-    return Button
-
-end
-
--- ==================================================
--- TOGGLE
--- ==================================================
-
-function Components.Toggle(
-    parent,
-    text,
-    default,
-    callback
-)
-
-    local enabled =
-        default == true
-
-    local Holder =
-        Instance.new("Frame")
-
-    Holder.Name =
-        tostring(text or "Toggle")
-
-    Holder.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            40
-        )
-
-    Holder.BackgroundColor3 =
-        Color3.fromRGB(
-            18,
-            18,
-            18
-        )
-
-    Holder.BorderSizePixel =
-        0
-
-    Holder.Parent =
-        parent
-
-    Corner(
-        Holder,
-        9
-    )
-
-    Stroke(
-        Holder,
-        Color3.fromRGB(
-            55,
-            55,
-            55
-        ),
-        1,
-        0.45
-    )
-
-    local Label =
-        Instance.new("TextLabel")
-
-    Label.Size =
-        UDim2.new(
-            1,
-            -65,
-            1,
-            0
-        )
-
-    Label.Position =
-        UDim2.fromOffset(
-            12,
-            0
-        )
-
-    Label.BackgroundTransparency =
-        1
-
-    Label.Text =
-        tostring(text or "Toggle")
-
-    Label.TextColor3 =
-        Theme.Text
-
-    Label.TextSize =
-        10
-
-    Label.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Label.Font =
-        Enum.Font.GothamMedium
-
-    Label.Parent =
-        Holder
-
-    local Switch =
-        Instance.new("TextButton")
-
-    Switch.Size =
-        UDim2.fromOffset(
-            42,
-            22
-        )
-
-    Switch.Position =
-        UDim2.new(
-            1,
-            -52,
-            0.5,
-            -11
-        )
-
-    Switch.BackgroundColor3 =
-        Color3.fromRGB(
-            42,
-            42,
-            42
-        )
-
-    Switch.BorderSizePixel =
-        0
-
-    Switch.Text =
-        ""
-
-    Switch.AutoButtonColor =
-        false
-
-    Switch.Parent =
-        Holder
-
-    Corner(
-        Switch,
-        12
-    )
-
-    local Knob =
-        Instance.new("Frame")
-
-    Knob.Size =
-        UDim2.fromOffset(
-            16,
-            16
-        )
-
-    Knob.Position =
-        UDim2.fromOffset(
-            3,
-            3
-        )
-
-    Knob.BackgroundColor3 =
-        Color3.fromRGB(
-            180,
-            180,
-            180
-        )
-
-    Knob.BorderSizePixel =
-        0
-
-    Knob.Parent =
-        Switch
-
-    Corner(
-        Knob,
-        8
-    )
-
-    local function Update(value)
-
-        enabled =
-            value == true
-
-        if enabled then
-
-            Tween(
-                Switch,
-                {
-                    BackgroundColor3 =
-                        Color3.fromRGB(
-                            230,
-                            230,
-                            230
-                        )
-                }
-            )
-
-            Tween(
-                Knob,
-                {
-                    Position =
-                        UDim2.new(
-                            1,
-                            -19,
-                            0,
-                            3
-                        ),
-
-                    BackgroundColor3 =
-                        Color3.fromRGB(
-                            15,
-                            15,
-                            15
-                        )
-                }
-            )
-
+function CreateCheckbox(Parent, TextValue, Order)
+    local Holder = Instance.new("Frame")
+    Holder.Name = TextValue:gsub("%s+", "_")
+    Holder.Size = UDim2.new(1, 0, 0, 32)
+    Holder.BackgroundTransparency = 1
+    Holder.BorderSizePixel = 0
+    Holder.LayoutOrder = Order or 1
+    Holder.Active = false
+    Holder.ZIndex = 9
+    Holder.Parent = Parent
+
+    local Label = Instance.new("TextLabel")
+    Label.Name = "Label"
+    Label.Size = UDim2.new(1, -38, 1, 0)
+    Label.Position = UDim2.new(0, 0, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = TextValue
+    Label.TextColor3 = Color3.fromRGB(205, 205, 220)
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextYAlignment = Enum.TextYAlignment.Center
+    Label.Font = Enum.Font.GothamMedium
+    Label.Active = false
+    Label.Selectable = false
+    Label.ZIndex = 10
+    Label.Parent = Holder
+
+    local CheckButton = Instance.new("TextButton")
+    CheckButton.Name = "CheckBox"
+    CheckButton.Size = UDim2.new(0, 26, 0, 26)
+    CheckButton.Position = UDim2.new(1, -26, 0.5, -13)
+    CheckButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
+    CheckButton.BorderSizePixel = 0
+    CheckButton.Text = ""
+    CheckButton.AutoButtonColor = false
+    CheckButton.Active = true
+    CheckButton.ZIndex = 20
+    CheckButton.Parent = Holder
+
+    local BoxCorner = Instance.new("UICorner")
+    BoxCorner.CornerRadius = UDim.new(0, 6)
+    BoxCorner.Parent = CheckButton
+
+    local BoxStroke = Instance.new("UIStroke")
+    BoxStroke.Color = Color3.fromRGB(200, 200, 220)
+    BoxStroke.Thickness = 1.5
+    BoxStroke.Parent = CheckButton
+
+    local Check = Instance.new("TextLabel")
+    Check.Name = "Check"
+    Check.Size = UDim2.new(1, 0, 1, 0)
+    Check.BackgroundTransparency = 1
+    Check.Text = "✓"
+    Check.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Check.TextSize = 18
+    Check.Font = Enum.Font.GothamBold
+    Check.Visible = false
+    Check.Active = false
+    Check.Selectable = false
+    Check.ZIndex = 21
+    Check.Parent = CheckButton
+
+    local Enabled = false
+
+    local function Toggle()
+        Enabled = not Enabled
+        Check.Visible = Enabled
+        if Enabled then
+            CheckButton.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+            BoxStroke.Color = Color3.fromRGB(245, 245, 245)
         else
-
-            Tween(
-                Switch,
-                {
-                    BackgroundColor3 =
-                        Color3.fromRGB(
-                            42,
-                            42,
-                            42
-                        )
-                }
-            )
-
-            Tween(
-                Knob,
-                {
-                    Position =
-                        UDim2.fromOffset(
-                            3,
-                            3
-                        ),
-
-                    BackgroundColor3 =
-                        Color3.fromRGB(
-                            180,
-                            180,
-                            180
-                        )
-                }
-            )
-
+            CheckButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
+            BoxStroke.Color = Color3.fromRGB(200, 200, 220)
         end
-
     end
 
-    Switch.MouseButton1Click:Connect(
-        function()
+    CheckButton.MouseButton1Click:Connect(function()
+        Toggle()
+    end)
 
-            Update(
-                not enabled
-            )
-
-            if callback then
-
-                task.spawn(
-                    function()
-
-                        local success, err =
-                            pcall(
-                                callback,
-                                enabled
-                            )
-
-                        if not success then
-                            warn(
-                                "[XenonByte] Toggle error:",
-                                err
-                            )
-                        end
-
-                    end
-                )
-
-            end
-
-        end
-    )
-
-    Update(
-        enabled
-    )
-
-    return {
-
-        Instance = Holder,
-
-        Button = Switch,
-
-        Get = function()
-            return enabled
-        end,
-
-        Set = function(value)
-
-            Update(
-                value
-            )
-
-            if callback then
-                callback(
-                    enabled
-                )
-            end
-
-        end
-
-    }
-
+    return Holder, CheckButton, function() return Enabled end
 end
 
 -- ==================================================
--- SLIDER
+-- CREATE TEXTBOX WITH CHECKBOX
 -- ==================================================
-
-function Components.Slider(
-    parent,
-    text,
-    min,
-    max,
-    default,
-    callback
-)
-
-    min =
-        tonumber(min)
-        or 0
-
-    max =
-        tonumber(max)
-        or 100
-
-    default =
-        math.clamp(
-            tonumber(default)
-                or min,
-            min,
-            max
-        )
-
-    local value =
-        default
-
-    local Holder =
-        Instance.new("Frame")
-
-    Holder.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            58
-        )
-
-    Holder.BackgroundColor3 =
-        Color3.fromRGB(
-            18,
-            18,
-            18
-        )
-
-    Holder.BorderSizePixel =
-        0
-
-    Holder.Parent =
-        parent
-
-    Corner(
-        Holder,
-        9
-    )
-
-    Stroke(
-        Holder,
-        Color3.fromRGB(
-            55,
-            55,
-            55
-        ),
-        1,
-        0.45
-    )
-
-    local Label =
-        Instance.new("TextLabel")
-
-    Label.Size =
-        UDim2.new(
-            1,
-            -80,
-            0,
-            22
-        )
-
-    Label.Position =
-        UDim2.fromOffset(
-            12,
-            5
-        )
-
-    Label.BackgroundTransparency =
-        1
-
-    Label.Text =
-        tostring(text or "Slider")
-
-    Label.TextColor3 =
-        Theme.Text
-
-    Label.TextSize =
-        10
-
-    Label.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Label.Font =
-        Enum.Font.GothamMedium
-
-    Label.Parent =
-        Holder
-
-    local ValueLabel =
-        Instance.new("TextLabel")
-
-    ValueLabel.Size =
-        UDim2.fromOffset(
-            55,
-            22
-        )
-
-    ValueLabel.Position =
-        UDim2.new(
-            1,
-            -65,
-            0,
-            5
-        )
-
-    ValueLabel.BackgroundTransparency =
-        1
-
-    ValueLabel.TextColor3 =
-        Theme.SubText
-
-    ValueLabel.TextSize =
-        9
-
-    ValueLabel.TextXAlignment =
-        Enum.TextXAlignment.Right
-
-    ValueLabel.Font =
-        Enum.Font.GothamBold
-
-    ValueLabel.Parent =
-        Holder
-
-    local Bar =
-        Instance.new("Frame")
-
-    Bar.Size =
-        UDim2.new(
-            1,
-            -24,
-            0,
-            6
-        )
-
-    Bar.Position =
-        UDim2.fromOffset(
-            12,
-            37
-        )
-
-    Bar.BackgroundColor3 =
-        Color3.fromRGB(
-            40,
-            40,
-            40
-        )
-
-    Bar.BorderSizePixel =
-        0
-
-    Bar.Parent =
-        Holder
-
-    Corner(
-        Bar,
-        5
-    )
-
-    local Fill =
-        Instance.new("Frame")
-
-    Fill.Size =
-        UDim2.new(
-            0,
-            0,
-            1,
-            0
-        )
-
-    Fill.BackgroundColor3 =
-        Color3.fromRGB(
-            230,
-            230,
-            230
-        )
-
-    Fill.BorderSizePixel =
-        0
-
-    Fill.Parent =
-        Bar
-
-    Corner(
-        Fill,
-        5
-    )
-
-    local function SetValue(newValue)
-
-        value =
-            math.clamp(
-                newValue,
-                min,
-                max
-            )
-
-        local alpha =
-            (value - min)
-            / (max - min)
-
-        if max == min then
-            alpha = 0
-        end
-
-        Fill.Size =
-            UDim2.new(
-                alpha,
-                0,
-                1,
-                0
-            )
-
-        ValueLabel.Text =
-            string.format(
-                "%.2f",
-                value
-            )
-
-        if callback then
-
-            task.spawn(
-                function()
-                    pcall(
-                        callback,
-                        value
-                    )
-                end
-            )
-
-        end
-
-    end
-
-    local function FromInput(input)
-
-        local x =
-            input.Position.X
-
-        local relative =
-            math.clamp(
-                x - Bar.AbsolutePosition.X,
-                0,
-                Bar.AbsoluteSize.X
-            )
-
-        local alpha =
-            relative
-            / Bar.AbsoluteSize.X
-
-        SetValue(
-            min
-            + (
-                max - min
-            ) * alpha
-        )
-
-    end
-
-    Bar.InputBegan:Connect(
-        function(input)
-
-            if
-                input.UserInputType
-                    == Enum.UserInputType.MouseButton1
-                or
-                input.UserInputType
-                    == Enum.UserInputType.Touch
-            then
-
-                FromInput(
-                    input
-                )
-
-            end
-
-        end
-    )
-
-    UserInputService.InputChanged:Connect(
-        function(input)
-
-            if
-                input.UserInputType
-                    == Enum.UserInputType.MouseMovement
-                or
-                input.UserInputType
-                    == Enum.UserInputType.Touch
-            then
-
-                if
-                    UserInputService:IsMouseButtonPressed(
-                        Enum.UserInputType.MouseButton1
-                    )
-                then
-
-                    FromInput(
-                        input
-                    )
-
-                end
-
-            end
-
-        end
-    )
-
-    SetValue(
-        value
-    )
-
-    return {
-
-        Instance = Holder,
-
-        Get = function()
-            return value
-        end,
-
-        Set = function(newValue)
-            SetValue(
-                newValue
-            )
-        end
-
-    }
-
-end
-
--- ==================================================
--- DROPDOWN
--- ==================================================
-
-function Components.Dropdown(
-    parent,
-    text,
-    options,
-    default,
-    callback
-)
-
-    options =
-        options
-        or {}
-
-    local selected =
-        default
-        or options[1]
-
-    local Holder =
-        Instance.new("Frame")
-
-    Holder.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            42
-        )
-
-    Holder.BackgroundColor3 =
-        Color3.fromRGB(
-            18,
-            18,
-            18
-        )
-
-    Holder.BorderSizePixel =
-        0
-
-    Holder.ClipsDescendants =
-        true
-
-    Holder.Parent =
-        parent
-
-    Corner(
-        Holder,
-        9
-    )
-
-    Stroke(
-        Holder,
-        Color3.fromRGB(
-            55,
-            55,
-            55
-        ),
-        1,
-        0.45
-    )
-
-    local Button =
-        Instance.new("TextButton")
-
-    Button.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            42
-        )
-
-    Button.BackgroundTransparency =
-        1
-
-    Button.Text =
-        tostring(text or "Dropdown")
-        .. "  •  "
-        .. tostring(selected or "None")
-
-    Button.TextColor3 =
-        Theme.Text
-
-    Button.TextSize =
-        10
-
-    Button.Font =
-        Enum.Font.GothamMedium
-
-    Button.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Button.Parent =
-        Holder
-
-    local Padding =
-        Instance.new("UIPadding")
-
-    Padding.PaddingLeft =
-        UDim.new(
-            0,
-            12
-        )
-
-    Padding.Parent =
-        Button
-
-    local Open = false
-
-    for index, option in ipairs(options) do
-
-        local Option =
-            Instance.new("TextButton")
-
-        Option.Size =
-            UDim2.new(
-                1,
-                -12,
-                0,
-                30
-            )
-
-        Option.Position =
-            UDim2.new(
-                0,
-                6,
-                0,
-                42
-                    + (
-                        index - 1
-                    ) * 32
-            )
-
-        Option.BackgroundColor3 =
-            Color3.fromRGB(
-                28,
-                28,
-                28
-            )
-
-        Option.BorderSizePixel =
-            0
-
-        Option.Text =
-            tostring(option)
-
-        Option.TextColor3 =
-            Theme.SubText
-
-        Option.TextSize =
-            9
-
-        Option.Font =
-            Enum.Font.GothamMedium
-
-        Option.Parent =
-            Holder
-
-        Corner(
-            Option,
-            7
-        )
-
-        Option.MouseButton1Click:Connect(
-            function()
-
-                selected =
-                    option
-
-                Button.Text =
-                    tostring(text or "Dropdown")
-                    .. "  •  "
-                    .. tostring(selected)
-
-                Open = false
-
-                Holder.Size =
-                    UDim2.new(
-                        1,
-                        0,
-                        0,
-                        42
-                    )
-
-                if callback then
-                    callback(
-                        selected
-                    )
-                end
-
-            end
-        )
-
-    end
-
-    Button.MouseButton1Click:Connect(
-        function()
-
-            Open =
-                not Open
-
-            if Open then
-
-                Holder.Size =
-                    UDim2.new(
-                        1,
-                        0,
-                        0,
-                        44
-                        + (
-                            #options
-                            * 32
-                        )
-                    )
-
-            else
-
-                Holder.Size =
-                    UDim2.new(
-                        1,
-                        0,
-                        0,
-                        42
-                    )
-
-            end
-
-        end
-    )
-
-    return {
-
-        Instance = Holder,
-
-        Get = function()
-            return selected
-        end,
-
-        Set = function(option)
-
-            selected =
-                option
-
-            Button.Text =
-                tostring(text or "Dropdown")
-                .. "  •  "
-                .. tostring(selected)
-
-        end
-
-    }
-
-end
-
--- ==================================================
--- TAB BUTTON
--- ==================================================
-
-function Components.TabButton(
-    parent,
-    text,
-    icon,
-    callback
-)
-
-    local Button =
-        Instance.new("TextButton")
-
-    Button.Name =
-        tostring(text or "Tab")
-
-    Button.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            Settings.UI.TabHeight
-        )
-
-    Button.BackgroundColor3 =
-        Color3.fromRGB(
-            20,
-            20,
-            20
-        )
-
-    Button.BackgroundTransparency =
-        1
-
-    Button.BorderSizePixel =
-        0
-
-    Button.AutoButtonColor =
-        false
-
-    Button.Text =
-        ""
-
-    Button.Parent =
-        parent
-
-    Corner(
-        Button,
-        8
-    )
-
-    local Icon =
-        Instance.new("TextLabel")
-
-    Icon.Size =
-        UDim2.fromOffset(
-            26,
-            32
-        )
-
-    Icon.Position =
-        UDim2.fromOffset(
-            5,
-            0
-        )
-
-    Icon.BackgroundTransparency =
-        1
-
-    Icon.Text =
-        tostring(icon or "•")
-
-    Icon.TextColor3 =
-        Theme.SubText
-
-    Icon.TextSize =
-        11
-
-    Icon.Font =
-        Enum.Font.GothamBold
-
-    Icon.Parent =
-        Button
-
-    local Label =
-        Instance.new("TextLabel")
-
-    Label.Size =
-        UDim2.new(
-            1,
-            -36,
-            1,
-            0
-        )
-
-    Label.Position =
-        UDim2.fromOffset(
-            34,
-            0
-        )
-
-    Label.BackgroundTransparency =
-        1
-
-    Label.Text =
-        tostring(text or "Tab")
-
-    Label.TextColor3 =
-        Theme.SubText
-
-    Label.TextSize =
-        9
-
-    Label.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Label.Font =
-        Enum.Font.GothamMedium
-
-    Label.Parent =
-        Button
-
-    local function SetActive(active)
-
-        if active then
-
-            Tween(
-                Button,
-                {
-                    BackgroundTransparency = 0,
-                    BackgroundColor3 =
-                        Color3.fromRGB(
-                            42,
-                            42,
-                            42
-                        )
-                }
-            )
-
-            Tween(
-                Icon,
-                {
-                    TextColor3 =
-                        Theme.Text
-                }
-            )
-
-            Tween(
-                Label,
-                {
-                    TextColor3 =
-                        Theme.Text
-                }
-            )
-
+function CreateTextBoxWithCheckbox(Parent, TextValue, Order, DefaultValue, MinValue, MaxValue)
+    DefaultValue = DefaultValue or 50
+    MinValue = MinValue or 0
+    MaxValue = MaxValue or 1000
+
+    local Holder = Instance.new("Frame")
+    Holder.Name = TextValue:gsub("%s+", "_")
+    Holder.Size = UDim2.new(1, 0, 0, 32)
+    Holder.BackgroundTransparency = 1
+    Holder.BorderSizePixel = 0
+    Holder.LayoutOrder = Order or 1
+    Holder.Active = false
+    Holder.ZIndex = 9
+    Holder.Parent = Parent
+
+    local Label = Instance.new("TextLabel")
+    Label.Name = "Label"
+    Label.Size = UDim2.new(0, 100, 1, 0)
+    Label.Position = UDim2.new(0, 0, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = TextValue
+    Label.TextColor3 = Color3.fromRGB(205, 205, 220)
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextYAlignment = Enum.TextYAlignment.Center
+    Label.Font = Enum.Font.GothamMedium
+    Label.Active = false
+    Label.Selectable = false
+    Label.ZIndex = 10
+    Label.Parent = Holder
+
+    local TextBox = Instance.new("TextBox")
+    TextBox.Name = "TextBox"
+    TextBox.Size = UDim2.new(0, 60, 1, -6)
+    TextBox.Position = UDim2.new(0, 105, 0, 3)
+    TextBox.BackgroundColor3 = Color3.fromRGB(30, 31, 45)
+    TextBox.BorderSizePixel = 0
+    TextBox.Text = tostring(DefaultValue)
+    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextBox.TextSize = 12
+    TextBox.TextXAlignment = Enum.TextXAlignment.Center
+    TextBox.TextYAlignment = Enum.TextYAlignment.Center
+    TextBox.Font = Enum.Font.GothamMedium
+    TextBox.ZIndex = 11
+    TextBox.Parent = Holder
+
+    local TBoxCorner = Instance.new("UICorner")
+    TBoxCorner.CornerRadius = UDim.new(0, 4)
+    TBoxCorner.Parent = TextBox
+
+    local TBoxStroke = Instance.new("UIStroke")
+    TBoxStroke.Color = Color3.fromRGB(200, 200, 220)
+    TBoxStroke.Thickness = 0.5
+    TBoxStroke.Transparency = 0.2
+    TBoxStroke.Parent = TextBox
+
+    local CheckButton = Instance.new("TextButton")
+    CheckButton.Name = "CheckBox"
+    CheckButton.Size = UDim2.new(0, 26, 0, 26)
+    CheckButton.Position = UDim2.new(1, -26, 0.5, -13)
+    CheckButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
+    CheckButton.BorderSizePixel = 0
+    CheckButton.Text = ""
+    CheckButton.AutoButtonColor = false
+    CheckButton.Active = true
+    CheckButton.ZIndex = 20
+    CheckButton.Parent = Holder
+
+    local BoxCorner = Instance.new("UICorner")
+    BoxCorner.CornerRadius = UDim.new(0, 6)
+    BoxCorner.Parent = CheckButton
+
+    local BoxStroke = Instance.new("UIStroke")
+    BoxStroke.Color = Color3.fromRGB(200, 200, 220)
+    BoxStroke.Thickness = 1.5
+    BoxStroke.Parent = CheckButton
+
+    local Check = Instance.new("TextLabel")
+    Check.Name = "Check"
+    Check.Size = UDim2.new(1, 0, 1, 0)
+    Check.BackgroundTransparency = 1
+    Check.Text = "✓"
+    Check.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Check.TextSize = 18
+    Check.Font = Enum.Font.GothamBold
+    Check.Visible = false
+    Check.Active = false
+    Check.Selectable = false
+    Check.ZIndex = 21
+    Check.Parent = CheckButton
+
+    local Enabled = false
+    local CurrentValue = DefaultValue
+
+    local function UpdateValue()
+        local val = tonumber(TextBox.Text)
+        if val then
+            CurrentValue = math.clamp(val, MinValue, MaxValue)
+            TextBox.Text = tostring(CurrentValue)
         else
-
-            Tween(
-                Button,
-                {
-                    BackgroundTransparency = 1
-                }
-            )
-
-            Tween(
-                Icon,
-                {
-                    TextColor3 =
-                        Theme.SubText
-                }
-            )
-
-            Tween(
-                Label,
-                {
-                    TextColor3 =
-                        Theme.SubText
-                }
-            )
-
+            TextBox.Text = tostring(CurrentValue)
         end
-
     end
 
-    Button.MouseEnter:Connect(
-        function()
-
-            if Button:GetAttribute(
-                "Active"
-            ) ~= true then
-
-                Tween(
-                    Button,
-                    {
-                        BackgroundTransparency =
-                            0.65
-                    }
-                )
-
-            end
-
+    local function Toggle()
+        Enabled = not Enabled
+        Check.Visible = Enabled
+        if Enabled then
+            CheckButton.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+            BoxStroke.Color = Color3.fromRGB(245, 245, 245)
+        else
+            CheckButton.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
+            BoxStroke.Color = Color3.fromRGB(200, 200, 220)
         end
-    )
+    end
 
-    Button.MouseLeave:Connect(
-        function()
+    CheckButton.MouseButton1Click:Connect(function()
+        Toggle()
+    end)
 
-            if Button:GetAttribute(
-                "Active"
-            ) ~= true then
+    TextBox.FocusLost:Connect(function()
+        UpdateValue()
+    end)
 
-                Tween(
-                    Button,
-                    {
-                        BackgroundTransparency =
-                            1
-                    }
-                )
+    return Holder, CheckButton, function() return Enabled end, TextBox, function() return CurrentValue end
+end
 
-            end
+-- ==================================================
+-- SMART CHECKBOX
+-- ==================================================
+function CreateSmartCheckbox(Parent, LabelText, Order, ToggleFunction, GetStateFunction)
+    local Holder = Instance.new("Frame")
+    Holder.Size = UDim2.new(1, 0, 0, 32)
+    Holder.BackgroundTransparency = 1
+    Holder.LayoutOrder = Order or 1
+    Holder.Parent = Parent
 
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -38, 1, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = LabelText
+    Label.TextColor3 = Color3.fromRGB(205, 205, 220)
+    Label.TextSize = 13
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextYAlignment = Enum.TextYAlignment.Center
+    Label.Font = Enum.Font.GothamMedium
+    Label.Parent = Holder
+
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0, 26, 0, 26)
+    Button.Position = UDim2.new(1, -26, 0.5, -13)
+    Button.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
+    Button.BorderSizePixel = 0
+    Button.Text = ""
+    Button.Parent = Holder
+
+    local BoxCorner = Instance.new("UICorner")
+    BoxCorner.CornerRadius = UDim.new(0, 6)
+    BoxCorner.Parent = Button
+
+    local BoxStroke = Instance.new("UIStroke")
+    BoxStroke.Color = Color3.fromRGB(200, 200, 220)
+    BoxStroke.Thickness = 1.5
+    BoxStroke.Parent = Button
+
+    local Check = Instance.new("TextLabel")
+    Check.Size = UDim2.new(1, 0, 1, 0)
+    Check.BackgroundTransparency = 1
+    Check.Text = "✓"
+    Check.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Check.TextSize = 18
+    Check.Font = Enum.Font.GothamBold
+    Check.Visible = false
+    Check.Parent = Button
+
+    local Enabled = false
+    if GetStateFunction then
+        Enabled = GetStateFunction()
+        Check.Visible = Enabled
+        if Enabled then
+            Button.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+            BoxStroke.Color = Color3.fromRGB(245, 245, 245)
         end
-    )
+    end
 
-    Button.MouseButton1Click:Connect(
-        function()
-
-            if callback then
-                callback()
-            end
-
+    local function UpdateUI(state)
+        Enabled = state
+        Check.Visible = state
+        if state then
+            Button.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+            BoxStroke.Color = Color3.fromRGB(245, 245, 245)
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(28, 29, 39)
+            BoxStroke.Color = Color3.fromRGB(200, 200, 220)
         end
-    )
+    end
+
+    Button.MouseButton1Click:Connect(function()
+        if ToggleFunction then
+            local currentState = GetStateFunction and GetStateFunction() or Enabled
+            local newState = not currentState
+            UpdateUI(newState)
+            task.spawn(function()
+                ToggleFunction()
+            end)
+        end
+    end)
 
     return {
-
-        Instance = Button,
-
-        SetActive = function(active)
-
-            Button:SetAttribute(
-                "Active",
-                active
-            )
-
-            SetActive(
-                active
-            )
-
-        end
-
+        Holder = Holder,
+        Button = Button,
+        GetState = function() return Enabled end,
+        SetState = UpdateUI,
+        Update = UpdateUI,
     }
-
 end
 
--- ==================================================
--- CARD
--- ==================================================
-
-function Components.Card(
-    parent,
-    title,
-    description
-)
-
-    local Card =
-        Instance.new("Frame")
-
-    Card.Name =
-        tostring(title or "Card")
-
-    Card.Size =
-        UDim2.new(
-            1,
-            0,
-            0,
-            70
-        )
-
-    Card.BackgroundColor3 =
-        Color3.fromRGB(
-            18,
-            18,
-            18
-        )
-
-    Card.BorderSizePixel =
-        0
-
-    Card.Parent =
-        parent
-
-    Corner(
-        Card,
-        11
-    )
-
-    Stroke(
-        Card,
-        Color3.fromRGB(
-            65,
-            65,
-            65
-        ),
-        1,
-        0.35
-    )
-
-    Gradient(
-        Card,
-        Color3.fromRGB(
-            27,
-            27,
-            27
-        ),
-        Color3.fromRGB(
-            12,
-            12,
-            12
-        ),
-        90
-    )
-
-    local Title =
-        Instance.new("TextLabel")
-
-    Title.Size =
-        UDim2.new(
-            1,
-            -24,
-            0,
-            23
-        )
-
-    Title.Position =
-        UDim2.fromOffset(
-            12,
-            9
-        )
-
-    Title.BackgroundTransparency =
-        1
-
-    Title.Text =
-        tostring(title or "Card")
-
-    Title.TextColor3 =
-        Theme.Text
-
-    Title.TextSize =
-        11
-
-    Title.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Title.Font =
-        Enum.Font.GothamBold
-
-    Title.Parent =
-        Card
-
-    local Description =
-        Instance.new("TextLabel")
-
-    Description.Size =
-        UDim2.new(
-            1,
-            -24,
-            0,
-            25
-        )
-
-    Description.Position =
-        UDim2.fromOffset(
-            12,
-            32
-        )
-
-    Description.BackgroundTransparency =
-        1
-
-    Description.Text =
-        tostring(description or "")
-
-    Description.TextColor3 =
-        Theme.SubText
-
-    Description.TextSize =
-        9
-
-    Description.TextWrapped =
-        true
-
-    Description.TextXAlignment =
-        Enum.TextXAlignment.Left
-
-    Description.Font =
-        Enum.Font.GothamMedium
-
-    Description.Parent =
-        Card
-
-    return Card
-
-end
-
--- ==================================================
--- EXPORT
--- ==================================================
-
-_G.XENONBYTE_Components =
-    Components
-
-return Components
+print("✅ Components Loaded")
